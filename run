@@ -1,0 +1,36 @@
+#!/usr/bin/env ruby -s
+
+# =====  Half-assed help screen  =====
+instructions = <<INSTRUCTIONS
+Example:
+$ ./run -w=20 -h=30
+INSTRUCTIONS
+
+at_exit { puts instructions if $! && !$!.kind_of?(SystemExit) }
+
+if $h == true
+  puts instructions
+  exit
+end
+
+
+require_relative 'maze'
+
+# =====  pretty drawing  =====
+clear       = "\e[H\e[2J"
+hide_cursor = "\e[?25l"
+show_cursor = "\e[?25h"
+print hide_cursor, clear
+at_exit { print show_cursor }
+
+# =====  Record randomness  =====
+seed = Random::DEFAULT.seed
+Random.srand seed
+at_exit { puts "Seed to get this maze again: #{seed}" }
+
+# ===== Main  =====
+width  = ($w || 40).to_i
+height = ($h || 40).to_i
+
+maze, start, finish = build_maze width, height
+path, searched      = breadth_first_search maze, start, finish

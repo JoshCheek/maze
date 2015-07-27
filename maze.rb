@@ -1,17 +1,5 @@
 ENABLE_DRAWING = true
 
-# =====  Init for drawing  =====
-clear       = "\e[H\e[2J"
-hide_cursor = "\e[?25l"
-show_cursor = "\e[?25h"
-print hide_cursor, clear
-at_exit { print show_cursor }
-
-# =====  Record randomness  =====
-seed = Random::DEFAULT.seed
-Random.srand seed
-at_exit { puts "Seed to get this maze again: #{seed}" }
-
 # =====  Maze functions  =====
 # uhm, might be nice to have a class here :P
 WALL       = '#'.freeze
@@ -196,8 +184,3 @@ def breadth_first_search(maze, start, finish)
 
   path
 end
-
-# =====  Main  =====
-
-maze, start, finish = build_maze 40, 40
-path, searched      = breadth_first_search maze, start, finish
