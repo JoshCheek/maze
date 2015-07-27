@@ -26,6 +26,7 @@ at_exit { print show_cursor }
 # =====  Record randomness  =====
 seed = Random::DEFAULT.seed
 Random.srand seed
+# Random.srand 86057636662888991353196408997421009309 bfs with 40/40 is really nice with this srand
 at_exit { puts "Seed to get this maze again: #{seed}" }
 
 # ===== Main  =====
@@ -33,4 +34,13 @@ width  = ($w || 40).to_i
 height = ($h || 40).to_i
 
 maze, start, finish = build_maze width, height
-path, searched      = breadth_first_search maze, start, finish
+*failed_paths, path = depth_first_search maze, start, finish
+
+
+failed_paths.each do |failed_path|
+  display maze, heading: {text: 'Path', colour: :blue},
+                green:   [start, finish],
+                red:     failed_path,
+                blue:    path
+  sleep 1
+end

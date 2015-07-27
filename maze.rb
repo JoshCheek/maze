@@ -184,3 +184,61 @@ def breadth_first_search(maze, start, finish)
 
   path
 end
+
+def depth_first_search(maze, current, finish, visited=[])
+  return [current] if current == finish
+
+  visited << current
+  display maze, heading: {text: 'Searching', colour: :blue},
+                green:   current,
+                blue:    visited,
+                red:     finish
+
+  edges_of(maze, current)
+    .select { |edge| path? maze, edge }
+    .reject { |edge| visited.include? edge }
+    .each   { |edge|
+      path = depth_first_search maze, edge, finish, visited
+      return path.insert(0, current) if path
+    }
+
+  nil
+end
+
+def depth_first_search(maze, start, finish)
+  visited     = []
+  paths_taken = []
+  stack       = [
+    [start, [start]]
+  ]
+
+  loop do
+    parent, children = stack.last
+
+    if children.empty?
+      stack.pop
+      next
+    end
+
+    current = children.shift
+    visited << current
+    break if current == finish
+
+    display maze, heading: {text: 'Searching', colour: :blue},
+                  green:   current,
+                  blue:    visited,
+                  red:     finish
+
+    edges = edges_of(maze, current).select do |edge|
+      path?(maze, edge) && edge != parent
+    end
+
+    paths_taken << (stack.map(&:first) << current) if edges.empty?
+
+    edges.reject! { |edge| visited.include? edge }
+    stack.push [current, edges]
+  end
+
+  paths_taken << stack.map(&:first)
+  paths_taken
+end
