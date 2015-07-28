@@ -40,7 +40,7 @@ Random.srand random_seed
 at_exit { puts "call with -s=#{random_seed} to get this maze again" }
 
 # ===== Main  =====
-display = Display.new(enable: true, stream: $stdout)
+display = Maze::Display.new(enable: true, stream: $stdout)
 display.clear
 
 display.without_cursor do
