@@ -73,41 +73,6 @@ class Maze
     end
   end
 
-  def breadth_first_search(start, finish, display)
-    came_from  = {start => start}  # record the how we got to each cell so we can reconstruct the path
-    to_explore = [start]           # a queue of where to search next
-
-    # search until we run out of places to look, or find the target
-    while finish != (current = to_explore.shift)
-      display.call heading: {text: 'Searching', colour: :blue},
-                   maze:    self,
-                   green:   [start, current],
-                   blue:    came_from.keys,
-                   magenta: to_explore,
-                   red:     finish
-
-      edges_of(current).each do |edge|
-        next unless is? edge, traversable: true
-        next if     came_from.key? edge
-        came_from[edge] = current
-        to_explore << edge
-      end
-    end
-
-    path = []
-    while current != came_from[current]
-      path << current
-      current = came_from[current]
-      display.call maze:    self,
-                   heading: {text: 'Building Path', colour: :green},
-                   magenta: [start, finish],
-                   green:   current,
-                   blue:    path,
-                   orange:  came_from.keys
-    end
-    path
-  end
-
   def to_raw_arrays
     maze.map(&:dup)
   end

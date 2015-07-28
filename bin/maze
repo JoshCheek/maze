@@ -44,10 +44,36 @@ display = Maze::Display.new(enable: true, stream: $stdout)
 display.clear
 
 display.without_cursor do
+  # =====  Generate the maze  =====
   maze = Maze::Generate.call width: maze_width, height: maze_height do |cell, generator|
     display.call maze:    generator.maze,
                  green:   cell,
                  heading: {text: "Paving", colour: :red}
   end
-  maze.breadth_first_search(maze.start, maze.finish, display)
+
+  # =====  Breadth First Search  =====
+  require 'maze/breadth_first_search'
+  on_search = lambda do |current, bfs|
+    display.call heading: {text: 'Searching', colour: :blue},
+                 maze:    maze,
+                 green:   [current, bfs.start],
+                 blue:    bfs.explored,
+                 magenta: bfs.to_explore,
+                 red:     bfs.finish
+  end
+
+  on_build_path = lambda do |current, bfs|
+    display.call maze:    maze,
+                 heading: {text: 'Building Path', colour: :green},
+                 magenta: [bfs.start, bfs.finish],
+                 green:   current,
+                 blue:    bfs.path,
+                 orange:  bfs.explored
+  end
+
+  Maze::BreadthFirstSearch.call maze:          maze,
+                                start:         maze.start,
+                                finish:        maze.finish,
+                                on_search:     on_search,
+                                on_build_path: on_build_path
 end
