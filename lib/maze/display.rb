@@ -28,7 +28,7 @@ class Maze
     attr_accessor :enabled, :stream, :colours
 
     def initialize(enable:,
-                   stream:  (raise "A stream must be provided when Display is enabled!" if enable),
+                   stream:  (enable and raise ArgumentError, "A stream must be provided when Display is enabled!"),
                    colours: DEFAULT_COLOURS
                   )
       self.colours = colours
@@ -39,7 +39,6 @@ class Maze
     alias enabled? enabled
 
     def call(maze:, **options)
-      return unless enabled?
       heading    = options.delete(:heading) || {text: "Debugging (#{caller[0]})", colour: :red}
       maze_array = maze.to_raw_arrays
       options.each do |colour, cells|
@@ -47,11 +46,11 @@ class Maze
         cells.each { |cell| colour_cell maze_array, cell, colour }
       end
 
-      stream.print "\e[1;1H" # move to top-left
+      print "\e[1;1H" # move to top-left
       text   = heading.fetch :text
       colour = heading.fetch :colour, :red
-      stream.puts colour("=====  #{text}  =====", :"fg_#{colour}")
-      stream.puts maze_string(maze_array)
+      puts colour("=====  #{text}  =====", :"fg_#{colour}")
+      puts maze_string(maze_array)
       sleep 0.01
     end
 
@@ -62,7 +61,7 @@ class Maze
     end
 
     def clear
-      stream.print "\e[H\e[2J"
+      print "\e[H\e[2J"
     end
 
     def without_cursor(&block)
@@ -73,11 +72,11 @@ class Maze
     end
 
     def hide_cursor
-      stream.print "\e[?25l"
+      print "\e[?25l"
     end
 
     def show_cursor
-      stream.print "\e[?25h"
+      print "\e[?25h"
     end
 
     def colour(text, colour)
@@ -91,6 +90,14 @@ class Maze
     end
 
     private
+
+    def puts(strings)
+      enabled? && stream.puts(*strings)
+    end
+
+    def print(*strings)
+      enabled? && stream.print(*strings)
+    end
 
     def text_for(cell)
       case cell

@@ -38,13 +38,10 @@ class Maze
 
   def set(type, cell)
     raise ArgumentError, "Unknown type: #{type.inspect}" unless ALL.include? type
-    if type == :start
-      self.start = cell
-    elsif type == :finish
-      self.finish = cell
+    if type == :start     then self.start  = cell
+    elsif type == :finish then self.finish = cell
     end
-    x, y = cell
-    maze[y][x] = type
+    maze[cell[1]][cell[0]] = type
     self
   end
 
