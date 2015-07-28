@@ -1,12 +1,28 @@
 #!/usr/bin/env ruby -s
 
+default_width  = 40
+default_height = 30
+
+maze_width  = ($w || default_width).to_i
+maze_height = ($h || default_height).to_i
+random_seed = ($s || Random::DEFAULT.seed).to_i
+
 # =====  Half-assed help screen  =====
 instructions = <<INSTRUCTIONS
 Example:
-$ ./run -w=20 -h=30
+  # use defaults
+  $ ./run
+
+  # set all the things!
+  $ ./run -w=20 -h=30 -s=
+
+Options
+  -w=123       # Set the maze width (defaults to #{default_width})
+  -h=123       # Set the maze height (defaults to #{default_height})
+  -s=123       # SEt the random seed (defaults to whatever Ruby initializes it with)
 INSTRUCTIONS
 
-at_exit { puts instructions if $! && !$!.kind_of?(SystemExit) }
+# at_exit { puts instructions if $! && !$!.kind_of?(SystemExit) }
 
 if $h == true
   puts instructions
@@ -24,13 +40,13 @@ print hide_cursor, clear
 at_exit { print show_cursor }
 
 # =====  Record randomness  =====
-seed = Random::DEFAULT.seed
-Random.srand seed
-at_exit { puts "Seed to get this maze again: #{seed}" }
+Random.srand random_seed
+at_exit { puts "call with -s=#{random_seed} to get this maze again" }
 
 # ===== Main  =====
-width  = ($w || 40).to_i
-height = ($h || 40).to_i
+display = Display.new(enable: true, stream: $stdout)
+maze    = GenerateMaze.call width: maze_width, height: maze_height, display: display
 
-maze, start, finish = build_maze width, height
-path, searched      = breadth_first_search maze, start, finish
+display.call maze: maze
+
+maze.breadth_first_search(maze.start, maze.finish)
