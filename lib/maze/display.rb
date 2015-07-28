@@ -51,11 +51,14 @@ class Maze
       text   = heading.fetch :text
       colour = heading.fetch :colour, :red
       stream.puts colour("=====  #{text}  =====", :"fg_#{colour}")
-      stream.puts maze_array.map { |row| row.zip(row).join }
-                            .join("\n")
-                            .gsub(Maze::START*2, " #{Maze::START}")
-                            .gsub(Maze::FINISH*2, " #{Maze::FINISH}")
+      stream.puts maze_string(maze_array)
       sleep 0.01
+    end
+
+    def maze_string(maze_array)
+      maze_array.map { |row|
+        row.map { |cell| text_for cell }.join
+      }.join("\n")
     end
 
     def clear
@@ -83,7 +86,21 @@ class Maze
     end
 
     def colour_cell(maze_array, (x, y), colour)
-      maze_array[y][x] = colour(maze_array[y][x], colour)
+      text = text_for maze_array[y][x]
+      maze_array[y][x] = colour text, colour
+    end
+
+    private
+
+    def text_for(cell)
+      case cell
+      when Maze::WALL   then '##'
+      when Maze::PATH   then '  '
+      when Maze::START  then ' S'
+      when Maze::FINISH then ' F'
+      when String       then cell
+      else raise "WTF IS #{cell.inspect}"
+      end
     end
   end
 end

@@ -2,11 +2,12 @@ require 'maze/display'
 require 'maze/generate'
 
 class Maze
-  WALL       = '#'.freeze
-  PATH       = ' '.freeze
-  START      = 'S'.freeze
-  FINISH     = 'F'.freeze
-  PATH_CELLS = [PATH, START, FINISH].freeze
+  WALL       = :wall
+  PATH       = :path
+  START      = :start
+  FINISH     = :finish
+  ALL        = [WALL, PATH, START, FINISH].freeze
+  PATH_CELLS = (ALL - [WALL]).freeze
 
   attr_reader :width, :height, :start, :finish
 
@@ -32,23 +33,18 @@ class Maze
   end
 
   def type((x, y))
-    case maze[y][x]
-    when '#' then :wall
-    when ' ' then :path
-    when 'S' then :start
-    when 'F' then :finish
-    else raise "WTF IS #{maze[y][x].inspect}, at y=#{y}, x=#{x}"
-    end
+    maze[y][x]
   end
 
   def set(type, cell)
+    raise ArgumentError, "Unknown type: #{type.inspect}" unless ALL.include? type
     if type == :start
       self.start = cell
     elsif type == :finish
       self.finish = cell
     end
     x, y = cell
-    maze[y][x] = char_for(type)
+    maze[y][x] = type
     self
   end
 
@@ -74,7 +70,7 @@ class Maze
       when :x_max       then x <= value
       when :y_min       then value <= y
       when :y_max       then y <= value
-      when :traversable then value == PATH_CELLS.include?(maze[y][x])
+      when :traversable then value == PATH_CELLS.include?(type cell)
       else raise ArgumentError, "WTF IS CRITERIA #{name.inspect}"
       end
     end
@@ -133,14 +129,4 @@ class Maze
 
   attr_writer :start, :finish
   attr_accessor :maze
-
-  def char_for((type))
-    case type
-    when :wall   then '#'
-    when :path   then ' '
-    when :start  then 'S'
-    when :finish then 'F'
-    else raise ArgumentError, "WTF IS TYPE #{type}"
-    end
-  end
 end
