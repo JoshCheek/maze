@@ -80,10 +80,6 @@ class Maze
     end
   end
 
-  def traversible?((x, y))
-    PATH_CELLS.include? maze[y][x]
-  end
-
   def breadth_first_search(start, finish, display)
     came_from  = {start => start}  # record the how we got to each cell so we can reconstruct the path
     to_explore = [start]           # a queue of where to search next
@@ -98,7 +94,7 @@ class Maze
                    red:     finish
 
       edges_of(current).each do |edge|
-        next unless traversible? edge
+        next unless is? edge, traversable: true
         next if     came_from.key? edge
         came_from[edge] = current
         to_explore << edge
