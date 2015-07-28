@@ -44,6 +44,10 @@ display = Maze::Display.new(enable: true, stream: $stdout)
 display.clear
 
 display.without_cursor do
-  maze = Maze::Generate.call width: maze_width, height: maze_height, display: display
+  maze = Maze::Generate.call width: maze_width, height: maze_height do |cell, generator|
+    display.call maze:    generator.maze,
+                 green:   cell,
+                 heading: {text: "Paving", colour: :red}
+  end
   maze.breadth_first_search(maze.start, maze.finish, display)
 end

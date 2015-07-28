@@ -2,15 +2,17 @@ require 'maze'
 
 class Maze
   class Generate
-    def self.call(attrs)
-      new(attrs).call
+    def self.call(attrs, &on_pave)
+      new(attrs, &on_pave).call
     end
 
-    def initialize(width:, height:, display:)
+    attr_accessor :width, :height, :maze, :explored, :on_pave
+
+    def initialize(width:, height:, &on_pave)
       self.width    = width
       self.height   = height
+      self.on_pave  = on_pave || Proc.new { }
       self.explored = []
-      self.display  = display
       self.maze     = Maze.new width: width, height: height
     end
 
@@ -23,12 +25,10 @@ class Maze
 
     private
 
-    attr_accessor :width, :height, :maze, :explored, :display
-
     def pave(crnt)
       explored << crnt
       maze.set :path, crnt
-      display.call heading: {text: "Paving", colour: :red}, maze: maze, green: crnt
+      on_pave.call crnt, self
       maze.edges_of(crnt).shuffle.each do |edge|
         next if     explored.include? edge
         next unless maze.is? edge, pathable_attrs
