@@ -1,4 +1,4 @@
-require 'maze'
+require 'spec_helper'
 
 RSpec.describe Maze::Display do
   specify '.null returns an unenabled display'

@@ -1,4 +1,4 @@
-require 'maze'
+require 'spec_helper'
 
 RSpec.describe Maze::Generate do
   it 'generates a maze with the given width, height'
