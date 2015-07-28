@@ -48,14 +48,14 @@ display.without_cursor do
   require 'maze/generate'
   maze = Maze::Generate.call width: maze_width, height: maze_height do |cell, generator|
     display.call maze:    generator.maze,
-                 green:   cell,
-                 heading: {text: "Paving", colour: :red}
+                 heading: {text: "Gnerating", colour: :red},
+                 green:   cell
   end
 
   # =====  Breadth First Search  =====
   require 'maze/breadth_first_search'
   on_search = lambda do |current, bfs|
-    display.call heading: {text: 'Searching', colour: :blue},
+    display.call heading: {text: 'Breadth First Search: Searching', colour: :blue},
                  maze:    maze,
                  green:   [current, bfs.start],
                  blue:    bfs.explored,
@@ -65,7 +65,7 @@ display.without_cursor do
 
   on_build_path = lambda do |current, bfs|
     display.call maze:    maze,
-                 heading: {text: 'Building Path', colour: :green},
+                 heading: {text: 'Breadth First Search: Building Path', colour: :green},
                  magenta: [bfs.start, bfs.finish],
                  green:   current,
                  blue:    bfs.path,
@@ -77,4 +77,29 @@ display.without_cursor do
                                 finish:        maze.finish,
                                 on_search:     on_search,
                                 on_build_path: on_build_path
+
+  puts display.colour("Press any key!", :red)
+  gets
+  display.clear
+
+  # =====  Depth First Search  =====
+  require 'maze/depth_first_search'
+
+  *failed_paths, path = Maze::DepthFirstSearch.call maze: maze, start: maze.start, finish: maze.finish do |current, visited, finish|
+    display.call maze:    maze,
+                 heading: {text: 'Depth First Search: Searching', colour: :blue},
+                 green:   current,
+                 blue:    visited,
+                 red:     finish
+
+  end
+
+  failed_paths.each do |failed_path|
+    display.call maze:    maze,
+                 heading: {text: 'Depth First Search: Showing Dead Ends', colour: :blue},
+                 green:   [maze.start, maze.finish],
+                 red:     failed_path,
+                 blue:    path
+    sleep 1
+  end
 end
