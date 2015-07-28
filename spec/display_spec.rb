@@ -96,9 +96,6 @@ RSpec.describe Maze::Display do
       display.call maze: maze, **attributes
     end
 
-    it 'respects the provided duration'
-    it 'defaults the duration to 0'
-
     it 'prints nothing when disabled' do
       stream.prints_something! { enabled.call maze: maze }
       stream.prints_nothing!   { disabled.call maze: maze }

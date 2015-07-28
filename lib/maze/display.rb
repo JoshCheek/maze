@@ -41,7 +41,7 @@ class Maze
     alias enabled? enabled
 
     def call(maze:, **options)
-      heading    = options.delete(:heading) || {text: "Debugging (#{caller[0]})", colour: :red}
+      heading        = options.delete(:heading) || {text: "Debugging (#{caller[0]})", colour: :red}
       maze_array = maze.to_raw_arrays
       options.each do |colour, cells|
         cells = [cells] if cells[0].kind_of? Fixnum
@@ -53,7 +53,6 @@ class Maze
       colour = heading.fetch :colour, :red
       puts colour("=====  #{text}  =====", :"fg_#{colour}")
       puts maze_string(maze_array)
-      sleep 0.01
     end
 
     def maze_string(maze_array)

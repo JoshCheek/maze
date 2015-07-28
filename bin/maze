@@ -38,9 +38,16 @@ $LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
 Random.srand random_seed
 at_exit { puts "call with -s=#{random_seed} to get this maze again" }
 
-# ===== Main  =====
+# =====  Other config  =====
 require 'maze/display'
-display = Maze::Display.new(enable: true, stream: $stdout)
+display = Maze::Display.new enable: true, stream: $stdout
+sleep_duration = if 1000 < maze_width * maze_height
+  sleep 0.01
+else
+  sleep 0.001
+end
+
+# ===== Main  =====
 display.clear
 
 display.without_cursor do
@@ -50,6 +57,7 @@ display.without_cursor do
     display.call maze:    generator.maze,
                  heading: {text: "Gnerating", colour: :red},
                  green:   cell
+    sleep sleep_duration
   end
 
   # =====  Breadth First Search  =====
@@ -61,6 +69,7 @@ display.without_cursor do
                  blue:    bfs.explored,
                  magenta: bfs.to_explore,
                  red:     bfs.finish
+    sleep sleep_duration
   end
 
   on_build_path = lambda do |current, bfs|
@@ -70,6 +79,7 @@ display.without_cursor do
                  green:   current,
                  blue:    bfs.path,
                  orange:  bfs.explored
+    sleep sleep_duration
   end
 
   Maze::BreadthFirstSearch.call maze:          maze,
@@ -85,21 +95,25 @@ display.without_cursor do
   # =====  Depth First Search  =====
   require 'maze/depth_first_search'
 
-  *failed_paths, path = Maze::DepthFirstSearch.call maze: maze, start: maze.start, finish: maze.finish do |current, visited, finish|
+  all_paths = Maze::DepthFirstSearch.call maze: maze, start: maze.start, finish: maze.finish do |current, visited, finish|
     display.call maze:    maze,
                  heading: {text: 'Depth First Search: Searching', colour: :blue},
                  green:   current,
                  blue:    visited,
                  red:     finish
-
+    sleep sleep_duration
   end
+
+  *failed_paths, success_path = all_paths
+  failed_sleep_duration = 1
+  failed_sleep_duration *= 0.5 if failed_paths.length > 20
 
   failed_paths.each do |failed_path|
     display.call maze:    maze,
                  heading: {text: 'Depth First Search: Showing Dead Ends', colour: :blue},
                  green:   [maze.start, maze.finish],
                  red:     failed_path,
-                 blue:    path
-    sleep 1
+                 blue:    success_path
+    sleep failed_sleep_duration
   end
 end
