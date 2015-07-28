@@ -9,27 +9,25 @@ class Maze
   PATH_CELLS = [PATH, START, FINISH].freeze
 
   attr_reader :width, :height, :start, :finish
-  attr_accessor :display
 
-  def initialize(width:, height:, display: Display.new)
+  def initialize(width:, height:)
     @width, @height = width, height
-    self.display = display
     self.maze = Array.new height do
       Array.new(width) { WALL }
     end
   end
 
   def random_cell(criteria={})
-    type  = criteria.fetch :type
-    x_min = criteria.fetch :x_min
-    x_max = criteria.fetch :x_max
-    y_min = criteria.fetch :y_min
-    y_max = criteria.fetch :y_max
+    type  = criteria.fetch :type,  :any
+    x_min = criteria.fetch :x_min, 0
+    x_max = criteria.fetch :x_max, width-1
+    y_min = criteria.fetch :y_min, 0
+    y_max = criteria.fetch :y_max, height-1
 
     loop do
-      cell = [x_min + rand(x_max-x_min),
-              y_min + rand(y_max-y_min)]
-      return cell if type == type(cell)
+      cell = [x_min + rand(1+x_max-x_min),
+              y_min + rand(1+y_max-y_min)]
+      return cell if is? cell, type: type
     end
   end
 
@@ -67,15 +65,17 @@ class Maze
   end
 
   def is?(cell, criteria)
+    raise IndexError, "#{cell.inspect} is not on the board!" unless on_board? cell
     x, y = cell
     criteria.all? do |name, value|
       case name
-      when :type  then type(cell) == value
-      when :x_min then value <= x
-      when :x_max then x <= value
-      when :y_min then value <= y
-      when :y_max then y <= value
-      else raise "WTF IS CRITERIA #{name.inspect}"
+      when :type        then value == :any || type(cell) == value
+      when :x_min       then value <= x
+      when :x_max       then x <= value
+      when :y_min       then value <= y
+      when :y_max       then y <= value
+      when :traversable then value == PATH_CELLS.include?(maze[y][x])
+      else raise ArgumentError, "WTF IS CRITERIA #{name.inspect}"
       end
     end
   end
@@ -84,7 +84,7 @@ class Maze
     PATH_CELLS.include? maze[y][x]
   end
 
-  def breadth_first_search(start, finish)
+  def breadth_first_search(start, finish, display)
     came_from  = {start => start}  # record the how we got to each cell so we can reconstruct the path
     to_explore = [start]           # a queue of where to search next
 
@@ -144,7 +144,7 @@ class Maze
     when :path   then ' '
     when :start  then 'S'
     when :finish then 'F'
-    else raise "WTF IS TYPE #{type}"
+    else raise ArgumentError, "WTF IS TYPE #{type}"
     end
   end
 end

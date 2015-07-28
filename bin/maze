@@ -45,5 +45,5 @@ display.clear
 
 display.without_cursor do
   maze = Maze::Generate.call width: maze_width, height: maze_height, display: display
-  maze.breadth_first_search(maze.start, maze.finish)
+  maze.breadth_first_search(maze.start, maze.finish, display)
 end

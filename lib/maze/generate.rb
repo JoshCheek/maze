@@ -11,7 +11,7 @@ class Maze
       self.height   = height
       self.explored = []
       self.display  = display
-      self.maze     = Maze.new width: width, height: height, display: display
+      self.maze     = Maze.new width: width, height: height
     end
 
     def call
