@@ -9,7 +9,7 @@ RSpec.describe Maze::Generate do
   end
 
   it 'randomly chooses a start and finish spot' do
-    starts_and_finishes = 100.times.map do
+    starts_and_finishes = 10.times.map do
       maze = Maze::Generate.call(width: 10, height: 10)
       [maze.start, maze.finish]
     end
