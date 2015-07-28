@@ -1,6 +1,3 @@
-require 'maze/display'
-require 'maze/generate'
-
 class Maze
   WALL       = :wall
   PATH       = :path

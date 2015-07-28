@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'maze'
 
 RSpec.describe Maze do
   let(:m1010) { Maze.new width: 10, height: 10 }

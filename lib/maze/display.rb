@@ -1,3 +1,5 @@
+require 'maze'
+
 class Maze
   class Display
     def self.null

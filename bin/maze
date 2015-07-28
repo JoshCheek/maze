@@ -33,18 +33,19 @@ random_seed = ($s || Random::DEFAULT.seed).to_i
 
 # =====  Load the lib =====
 $LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
-require 'maze'
 
 # =====  Record randomness  =====
 Random.srand random_seed
 at_exit { puts "call with -s=#{random_seed} to get this maze again" }
 
 # ===== Main  =====
+require 'maze/display'
 display = Maze::Display.new(enable: true, stream: $stdout)
 display.clear
 
 display.without_cursor do
   # =====  Generate the maze  =====
+  require 'maze/generate'
   maze = Maze::Generate.call width: maze_width, height: maze_height do |cell, generator|
     display.call maze:    generator.maze,
                  green:   cell,
