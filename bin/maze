@@ -44,6 +44,6 @@ display = Maze::Display.new(enable: true, stream: $stdout)
 display.clear
 
 display.without_cursor do
-  maze = GenerateMaze.call width: maze_width, height: maze_height, display: display
+  maze = Maze::Generate.call width: maze_width, height: maze_height, display: display
   maze.breadth_first_search(maze.start, maze.finish)
 end
