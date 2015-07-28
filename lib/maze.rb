@@ -3,48 +3,15 @@ class Display
     new enable: false
   end
 
-  attr_accessor :enabled, :stream
-
-  def initialize(enable:, stream:(raise "A stream must be provided when Display is enabled!" if enable))
-    self.enabled = enable
-    self.stream  = stream
-  end
-
-  alias enabled? enabled
-
-  def call(maze:, **options)
-    return unless enabled?
-    heading    = options.delete :heading
-    maze_array = maze.to_raw_arrays
-    options.each do |colour, cells|
-      cells = [cells] if cells[0].kind_of? Fixnum
-      cells.each { |cell| colour_cell maze_array, cell, colour }
-    end
-
-    stream.print "\e[1;1H" # move to top-left
-    if heading
-      text   = heading.fetch :text
-      colour = heading.fetch :colour, :red
-      stream.puts colour("=====  #{text}  =====", :"fg_#{colour}")
-    end
-    stream.puts maze_array.map { |row|
-      # row.zip(row).join
-      row.join
-    }.join("\n")
-     .sub(Maze::START*2, " #{Maze::START}").sub(Maze::FINISH*2, " #{Maze::FINISH}")
-    sleep 0.01
-  end
-
-  def colour(text, colour)
-    colours = {
-      black:   [7, 0],
-      red:     [7, 1],
-      green:   [0, 2],
-      orange:  [7, 3],
-      blue:    [7, 4],
-      magenta: [7, 5],
-      cyan:    [0, 6],
-      white:   [0, 7],
+  DEFAULT_COLOURS = {
+      black:      [7, 0],
+      red:        [7, 1],
+      green:      [0, 2],
+      orange:     [7, 3],
+      blue:       [7, 4],
+      magenta:    [7, 5],
+      cyan:       [0, 6],
+      white:      [0, 7],
 
       fg_black:   [0, 0],
       fg_red:     [1, 0],
@@ -54,7 +21,62 @@ class Display
       fg_magenta: [5, 0],
       fg_cyan:    [6, 0],
       fg_white:   [7, 0],
-    }
+  }.freeze
+  DEFAULT_COLOURS.values.each(&:freeze)
+
+  attr_accessor :enabled, :stream, :colours
+
+  def initialize(enable:,
+                 stream:  (raise "A stream must be provided when Display is enabled!" if enable),
+                 colours: DEFAULT_COLOURS
+                )
+    self.colours = colours
+    self.enabled = enable
+    self.stream  = stream
+  end
+
+  alias enabled? enabled
+
+  def call(maze:, **options)
+    return unless enabled?
+    heading    = options.delete(:heading) || {text: "Debugging (#{caller[0]})", colour: :red}
+    maze_array = maze.to_raw_arrays
+    options.each do |colour, cells|
+      cells = [cells] if cells[0].kind_of? Fixnum
+      cells.each { |cell| colour_cell maze_array, cell, colour }
+    end
+
+    stream.print "\e[1;1H" # move to top-left
+    text   = heading.fetch :text
+    colour = heading.fetch :colour, :red
+    stream.puts colour("=====  #{text}  =====", :"fg_#{colour}")
+    stream.puts maze_array.map { |row| row.zip(row).join }
+                          .join("\n")
+                          .gsub(Maze::START*2, " #{Maze::START}")
+                          .gsub(Maze::FINISH*2, " #{Maze::FINISH}")
+    sleep 0.01
+  end
+
+  def clear
+    stream.print "\e[H\e[2J"
+  end
+
+  def without_cursor(&block)
+    hide_cursor
+    block.call
+  ensure
+    show_cursor
+  end
+
+  def hide_cursor
+    stream.print "\e[?25l"
+  end
+
+  def show_cursor
+    stream.print "\e[?25h"
+  end
+
+  def colour(text, colour)
     fg, bg = colours.fetch colour
     "\e[3#{fg}m\e[4#{bg}m#{text}\e[0m"
   end
@@ -81,17 +103,7 @@ class GenerateMaze
     start = maze.random_cell pathable_attrs
     pave(start)
     finish = explored.select { |cell| cell != start }.shuffle.first
-    begin
-      maze.set(:start, start).set(:finish, finish)
-    rescue
-      if start && finish
-        display.call maze: maze, red: start, orange: finish
-      else
-        p start: start, finish: finish
-      end
-      require "pry"
-      binding.pry
-    end
+    maze.set(:start, start).set(:finish, finish)
   end
 
   private
@@ -100,9 +112,8 @@ class GenerateMaze
 
   def pave(crnt)
     explored << crnt
-    maze.set(:path, crnt)
-    display.call heading: {text: "Paving"}, maze: maze, blue: crnt
-
+    maze.set :path, crnt
+    # display.call heading: {text: "Paving", colour: :red}, maze: maze, green: crnt
     maze.edges_of(crnt).shuffle.each do |edge|
       next if     explored.include? edge
       next unless maze.is? edge, pathable_attrs
@@ -220,7 +231,7 @@ class Maze
   def is?(cell, criteria)
     x, y = cell
     criteria.all? do |name, value|
-      result = case name
+      case name
       when :type  then type(cell) == value
       when :x_min then value <= x
       when :x_max then x <= value
@@ -228,43 +239,45 @@ class Maze
       when :y_max then y <= value
       else raise "WTF IS CRITERIA #{name.inspect}"
       end
-
-      # if !result
-      #   system "clear"
-      #   display.call maze: self, green: cell
-      #   p cell: cell, result: result, name => value
-      #   require "pry"
-      #   binding.pry
-      # end
-
-      result
     end
   end
 
+  def traversible?((x, y))
+    PATH_CELLS.include? maze[y][x]
+  end
+
   def breadth_first_search(start, finish)
-    came_from = {start => start}
+    came_from  = {start => start}  # record the how we got to each cell so we can reconstruct the path
+    to_explore = [start]           # a queue of where to search next
 
-    to_explore = [start]
+    # search until we run out of places to look, or find the target
+    while finish != (current = to_explore.shift)
+      display.call heading: {text: 'Searching', colour: :blue},
+                   maze:    self,
+                   green:   [start, current],
+                   blue:    came_from.keys,
+                   magenta: to_explore,
+                   red:     finish
 
-    while to_explore.any?
-      current = to_explore.shift
-      display.call maze: self, heading: {text: 'Searching', colour: :blue}, green: [start, current], blue: came_from.keys, magenta: to_explore, red: finish
-      edges_of(current)
-        .select { |edge| is? edge, type: :path }
-        .reject { |edge| came_from.key? edge }
-        .each   { |edge| came_from[edge] = current
-                         to_explore << edge
-                }
-      break if current == finish
+      edges_of(current).each do |edge|
+        next unless traversible? edge
+        next if     came_from.key? edge
+        came_from[edge] = current
+        to_explore << edge
+      end
     end
 
     path = []
     while current != came_from[current]
       path << current
       current = came_from[current]
-      display.call maze: self, heading: {text: 'Building Path', colour: :green}, magenta: [start, finish], green: current, blue: path, orange: came_from.keys
+      display.call maze:    self,
+                   heading: {text: 'Building Path', colour: :green},
+                   magenta: [start, finish],
+                   green:   current,
+                   blue:    path,
+                   orange:  came_from.keys
     end
-
     path
   end
 

@@ -3,18 +3,14 @@
 default_width  = 40
 default_height = 30
 
-maze_width  = ($w || default_width).to_i
-maze_height = ($h || default_height).to_i
-random_seed = ($s || Random::DEFAULT.seed).to_i
-
 # =====  Half-assed help screen  =====
 instructions = <<INSTRUCTIONS
 Example:
   # use defaults
-  $ ./run
+  $ #{$PROGRAM_NAME}
 
   # set all the things!
-  $ ./run -w=20 -h=30 -s=
+  $ #{$PROGRAM_NAME} -w=20 -h=30 -s=
 
 Options
   -w=123       # Set the maze width (defaults to #{default_width})
@@ -22,22 +18,22 @@ Options
   -s=123       # SEt the random seed (defaults to whatever Ruby initializes it with)
 INSTRUCTIONS
 
-# at_exit { puts instructions if $! && !$!.kind_of?(SystemExit) }
+at_exit { puts instructions if $! && !$!.kind_of?(SystemExit) }
 
 if $h == true
   puts instructions
   exit
 end
 
+# =====  Arg parsing (done mostly by ruby via the -s flag)  =====
 
-require_relative 'maze'
+maze_width  = ($w || default_width).to_i
+maze_height = ($h || default_height).to_i
+random_seed = ($s || Random::DEFAULT.seed).to_i
 
-# =====  pretty drawing  =====
-clear       = "\e[H\e[2J"
-hide_cursor = "\e[?25l"
-show_cursor = "\e[?25h"
-print hide_cursor, clear
-at_exit { print show_cursor }
+# =====  Load the lib =====
+$LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
+require 'maze'
 
 # =====  Record randomness  =====
 Random.srand random_seed
@@ -45,8 +41,9 @@ at_exit { puts "call with -s=#{random_seed} to get this maze again" }
 
 # ===== Main  =====
 display = Display.new(enable: true, stream: $stdout)
-maze    = GenerateMaze.call width: maze_width, height: maze_height, display: display
+display.clear
 
-display.call maze: maze
-
-maze.breadth_first_search(maze.start, maze.finish)
+display.without_cursor do
+  maze = GenerateMaze.call width: maze_width, height: maze_height, display: display
+  maze.breadth_first_search(maze.start, maze.finish)
+end
