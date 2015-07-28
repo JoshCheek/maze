@@ -20,20 +20,17 @@ class Maze
   end
 
   def random_cell(criteria={})
-    type  = criteria.fetch :type,  :any
-    x_min = criteria.fetch :x_min, 0
-    x_max = criteria.fetch :x_max, width-1
-    y_min = criteria.fetch :y_min, 0
-    y_max = criteria.fetch :y_max, height-1
+    type  = criteria.fetch :type
+    x_min = criteria.fetch :x_min
+    x_max = criteria.fetch :x_max
+    y_min = criteria.fetch :y_min
+    y_max = criteria.fetch :y_max
 
-    100.times do
-      cell = [
-        x_min + rand(x_max-x_min),
-        y_min + rand(y_max-y_min)
-      ]
+    loop do
+      cell = [x_min + rand(x_max-x_min),
+              y_min + rand(y_max-y_min)]
       return cell if type == type(cell)
     end
-    raise "100 iterations in, we couldn't find one good enough for #{criteria.inspect}"
   end
 
   def type((x, y))
@@ -69,7 +66,6 @@ class Maze
     0 <= x && 0 <= y && y < height && x < width
   end
 
-  # FIXME
   def is?(cell, criteria)
     x, y = cell
     criteria.all? do |name, value|
