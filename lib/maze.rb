@@ -34,8 +34,8 @@ class Maze
   end
 
   def set(type, cell)
-    raise ArgumentError, "Unknown type: #{type.inspect}" unless ALL.include? type
-    if type == :start     then self.start  = cell
+    ALL.include? type or raise ArgumentError, "Unknown type: #{type.inspect}"
+    if    type == :start  then self.start  = cell
     elsif type == :finish then self.finish = cell
     end
     maze[cell[1]][cell[0]] = type
@@ -55,7 +55,7 @@ class Maze
   end
 
   def is?(cell, criteria)
-    raise IndexError, "#{cell.inspect} is not on the board!" unless on_board? cell
+    on_board? cell or raise IndexError, "#{cell.inspect} is not on the board!"
     x, y = cell
     criteria.all? do |name, value|
       case name

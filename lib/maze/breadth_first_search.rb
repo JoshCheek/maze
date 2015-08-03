@@ -12,6 +12,8 @@ class Maze
 
     attr_accessor :came_from, :to_explore, :on_search, :on_build_path
 
+    # would be nice to support "callback after you've explored all the nodes at this depth"
+    # otherwise it seems to slow down based on how many heads there are
     def initialize(on_search:NULL_CALLBACK, on_build_path:NULL_CALLBACK, **keyrest)
       super(**keyrest)
       self.on_search     = on_search
