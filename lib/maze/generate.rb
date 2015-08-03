@@ -33,9 +33,8 @@ class Maze
       maze.edges_of(crnt).shuffle.each do |edge|
         next if     explored.include? edge
         next unless maze.is? edge, pathable_attrs
-        next unless maze.is? maze.cell_line(crnt, edge),
-                             pathable_or_edge_attrs
         next unless no_problem_corners? edge
+        next unless maze.is? maze.cell_line(crnt, edge), pathable_or_edge_attrs
         pave edge
       end
     end
@@ -71,52 +70,6 @@ class Maze
         num_shared = maze.shared_edges(cell, corner).count { |edge| maze.is? edge, type: :path }
         maze.is?(corner, type: :wall) || 1 == num_shared
       end
-    end
-
-    # at least two sides of the block must be completely clear
-    def causes_block?(cell)
-      each_block_adjacent_to cell do |block|
-        next unless all_wall? block
-        return block if num_sides_walled(block) < 2
-      end
-      false
-    end
-
-    def num_sides_walled(block)
-      xs, ys = block.transpose
-      minx, maxx = xs.minmax
-      miny, maxy = ys.minmax
-
-      [ [[minx-1, miny  ], [minx-1, maxy  ]],
-        [[maxx+1, miny  ], [maxx+1, maxy  ]],
-        [[minx  , miny-1], [maxx  , maxy-1]],
-        [[minx  , miny+1], [maxx  , maxy+1]],
-      ].count { |adjacent| all_wall? adjacent }
-    end
-
-    def all_wall?(cells)
-      cells.all? do |cell|
-        maze.on_board?(cell) && maze.is?(cell, type: :wall)
-      end
-    end
-
-    def each_block_adjacent_to((x, y))
-      yield [[x-1, y-2], [x  , y-2], # upper left
-             [x-1, y-1], [x  , y-1]]
-      yield [[x  , y-2], [x+1, y-2], # upper right
-             [x  , y-1], [x+1, y-1]]
-      yield [[x+1, y-1], [x+2, y-1], # right upper
-             [x+1, y  ], [x+2, y  ]]
-      yield [[x+1, y  ], [x+2, y  ], # right lower
-             [x+1, y+1], [x+2, y+1]]
-      yield [[x  , y-1], [x+1, y-1], # lower right
-             [x  , y-2], [x+1, y-2]]
-      yield [[x-1, y-1], [x  , y-1], # lower left
-             [x-1, y-2], [x  , y-2]]
-      yield [[x-2, y  ], [x-1, y  ], # right lower
-             [x-2, y-1], [x-1, y-1]]
-      yield [[x-2, y+1], [x-1, y+1], # right upper
-             [x-2, y  ], [x-1, y  ]]
     end
   end
 end
