@@ -6,32 +6,23 @@ class Maze
       new(attrs, &block).call
     end
 
-    attr_accessor :maze, :start, :finish, :on_search, :on_build_path
-    attr_accessor :callback
+    attr_accessor :maze, :start, :finish, :callback, :explored
+    attr_accessor :success_path, :failed_paths, :all_paths
 
     def initialize(maze:, start:, finish:, &callback)
-      self.maze          = maze
-      self.start         = start
-      self.finish        = finish
-      self.on_search     = on_search
-      self.callback      = callback
+      self.maze         = maze
+      self.start        = start
+      self.finish       = finish
+      self.callback     = callback || Proc.new { }
+      self.explored     = []
+      self.failed_paths = []
+      self.all_paths    = []
     end
 
     # Prob break this out into another class (ie RecursiveDepthFirstSearch), if I want to keep it
-
-    # def call
-    #   recursive start, []
-    # end
-
     # def recursive(current, visited=[])
     #   return [current] if current == finish
-
     #   visited << current
-    #   display maze, heading: {text: 'Searching', colour: :blue},
-    #                 green:   current,
-    #                 blue:    visited,
-    #                 red:     finish
-
     #   edges_of(maze, current)
     #     .select { |edge| path? maze, edge }
     #     .reject { |edge| visited.include? edge }
@@ -39,16 +30,13 @@ class Maze
     #       path = recursive maze, edge, finish, visited
     #       return path.insert(0, current) if path
     #     }
-
     #   nil
     # end
 
     def call
-      visited     = []
-      paths_taken = []
-      stack       = [
-        [start, [start]]
-      ]
+      explored << start
+      callback.call start, self
+      stack = [[start, edges_for(start, nil)]]
 
       loop do
         parent, children = stack.last
@@ -59,23 +47,40 @@ class Maze
         end
 
         current = children.shift
-        visited << current
-        break if current == finish
+        explored << current
+        callback.call current, self
 
-        callback.call current, visited, finish
-
-        edges = maze.edges_of(current).select do |edge|
-          maze.is?(edge, traversable: true) && edge != parent
+        if current == finish
+          stack.push [current, []]
+          break
         end
 
-        paths_taken << (stack.map(&:first) << current) if edges.empty?
+        edges = edges_for current, parent
 
-        edges.reject! { |edge| visited.include? edge }
+        add_path :failed, (stack.map(&:first) << current) if edges.empty?
+
+        edges.reject! { |edge| explored.include? edge }
         stack.push [current, edges]
       end
+      add_path :success, stack.map(&:first)
+      self
+    end
 
-      paths_taken << stack.map(&:first)
-      paths_taken
+    private
+
+    def add_path(type, path)
+      all_paths << path
+      if type == :success
+        self.success_path = path
+      else
+        self.failed_paths << path
+      end
+    end
+
+    def edges_for(cell, parent)
+      maze.edges_of(cell).select do |edge|
+        maze.is?(edge, traversable: true) && edge != parent
+      end
     end
   end
 end

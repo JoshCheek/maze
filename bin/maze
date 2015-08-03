@@ -9,13 +9,16 @@ Example:
   # use defaults
   $ #{$PROGRAM_NAME}
 
-  # set all the things!
-  $ #{$PROGRAM_NAME} -w=20 -h=30 -s=
+  # Custom width/height
+  $ #{$PROGRAM_NAME} -w=20 -h=30
+
+  # This one was nice! Not too big, and interesting paths
+  $ bin/maze -w=40 -h=30 -s=323932603995730790334566679846613985025
 
 Options
   -w=123       # Set the maze width (defaults to #{default_width})
   -h=123       # Set the maze height (defaults to #{default_height})
-  -s=123       # SEt the random seed (defaults to whatever Ruby initializes it with)
+  -s=123       # Set the random seed (defaults to whatever Ruby initializes it with)
 INSTRUCTIONS
 
 at_exit { puts instructions if $! && !$!.kind_of?(SystemExit) }
@@ -95,25 +98,29 @@ display.without_cursor do
   # =====  Depth First Search  =====
   require 'maze/depth_first_search'
 
-  all_paths = Maze::DepthFirstSearch.call maze: maze, start: maze.start, finish: maze.finish do |current, visited, finish|
+  dfs = Maze::DepthFirstSearch.call maze: maze, start: maze.start, finish: maze.finish do |current, dfs|
     display.call maze:    maze,
                  heading: {text: 'Depth First Search: Searching', colour: :blue},
                  green:   current,
-                 blue:    visited,
-                 red:     finish
+                 blue:    dfs.explored,
+                 red:     dfs.finish
     sleep sleep_duration
   end
 
-  *failed_paths, success_path = all_paths
   failed_sleep_duration = 1
-  failed_sleep_duration *= 0.5 if failed_paths.length > 20
+  failed_sleep_duration *= 0.5 if dfs.failed_paths.length > 20
 
-  failed_paths.each do |failed_path|
+  dfs.failed_paths.each do |failed_path|
     display.call maze:    maze,
                  heading: {text: 'Depth First Search: Showing Dead Ends', colour: :blue},
                  green:   [maze.start, maze.finish],
                  red:     failed_path,
-                 blue:    success_path
+                 blue:    dfs.success_path
     sleep failed_sleep_duration
   end
+
+  display.call maze:    maze,
+               heading: {text: 'Depth First Search: Success Path', colour: :blue},
+               green:   [maze.start, maze.finish],
+               blue:    dfs.success_path
 end
