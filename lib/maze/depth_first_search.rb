@@ -19,20 +19,6 @@ class Maze
       self.all_paths    = []
     end
 
-    # Prob break this out into another class (ie RecursiveDepthFirstSearch), if I want to keep it
-    # def recursive(current, visited=[])
-    #   return [current] if current == finish
-    #   visited << current
-    #   edges_of(maze, current)
-    #     .select { |edge| path? maze, edge }
-    #     .reject { |edge| visited.include? edge }
-    #     .each   { |edge|
-    #       path = recursive maze, edge, finish, visited
-    #       return path.insert(0, current) if path
-    #     }
-    #   nil
-    # end
-
     def call
       explored << start
       callback.call start, self

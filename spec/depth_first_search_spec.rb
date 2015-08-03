@@ -1,7 +1,13 @@
 require 'spec_helper'
 require 'maze/depth_first_search'
+require 'maze/recursive_depth_first_search'
 
-RSpec.describe Maze::DepthFirstSearch do
+test_dfs = lambda do |&tests|
+  RSpec.describe Maze::DepthFirstSearch,          &tests
+  RSpec.describe Maze::RecursiveDepthFirstSearch, &tests
+end
+
+test_dfs.call do
   include SpecHelpers
 
   def dfs_for(maze, &block)
