@@ -7,23 +7,23 @@ class Maze
     end
 
     DEFAULT_COLOURS = {
-        black:      [7, 0],
-        red:        [7, 1],
-        green:      [0, 2],
-        orange:     [7, 3],
-        blue:       [7, 4],
-        magenta:    [7, 5],
-        cyan:       [0, 6],
-        white:      [0, 7],
+      black:      [7, 0],
+      red:        [7, 1],
+      green:      [0, 2],
+      orange:     [7, 3],
+      blue:       [7, 4],
+      magenta:    [7, 5],
+      cyan:       [0, 6],
+      white:      [0, 7],
 
-        fg_black:   [0, 0],
-        fg_red:     [1, 0],
-        fg_green:   [2, 0],
-        fg_orange:  [3, 0],
-        fg_blue:    [4, 0],
-        fg_magenta: [5, 0],
-        fg_cyan:    [6, 0],
-        fg_white:   [7, 0],
+      fg_black:   [0, 0],
+      fg_red:     [1, 0],
+      fg_green:   [2, 0],
+      fg_orange:  [3, 0],
+      fg_blue:    [4, 0],
+      fg_magenta: [5, 0],
+      fg_cyan:    [6, 0],
+      fg_white:   [7, 0],
     }.freeze
     DEFAULT_COLOURS.values.each(&:freeze)
 
@@ -43,7 +43,7 @@ class Maze
       heading        = options.delete(:heading) || {text: "Debugging (#{caller[0]})", colour: :red}
       maze_array = maze.to_raw_arrays
       options.each do |colour, cells|
-        cells = [cells] if cells[0].kind_of? Fixnum
+        cells = [cells] if cells.kind_of?(Array) && cells[0].kind_of?(Fixnum)
         cells.each { |cell| colour_cell maze_array, cell, colour }
       end
 

@@ -1,3 +1,4 @@
+require 'set'
 require 'maze'
 
 class Maze
@@ -12,7 +13,7 @@ class Maze
       self.width    = width
       self.height   = height
       self.on_pave  = on_pave || Proc.new { }
-      self.explored = []
+      self.explored = Set.new
       self.maze     = Maze.new width: width, height: height
     end
 

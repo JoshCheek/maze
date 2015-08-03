@@ -38,7 +38,7 @@ test_dfs.call do
               [[0,0],[1,0],[2,0]],
             ]
     maze = maze_for "S F"
-    dfs_for(maze) { |cell, dfs| expect(dfs.explored).to eq seens.shift }
+    dfs_for(maze) { |cell, dfs| expect(dfs.explored).to eq Set.new(seens.shift) }
     expect(seens).to be_empty
   end
 

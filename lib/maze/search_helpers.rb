@@ -1,3 +1,4 @@
+require 'set'
 require 'maze'
 
 class Maze
@@ -9,7 +10,7 @@ class Maze
       self.maze         = maze
       self.start        = start
       self.finish       = finish
-      self.explored     = []
+      self.explored     = Set.new
       self.all_paths    = []
       self.failed_paths = []
       self.success_path = []
