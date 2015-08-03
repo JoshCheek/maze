@@ -6,7 +6,7 @@ class Maze
       new(attrs, &block).call
     end
 
-    attr_accessor :maze, :start, :finish, :callback, :explored
+    attr_accessor :maze, :start, :finish, :callback, :explored, :stack
     attr_accessor :success_path, :failed_paths, :all_paths
 
     def initialize(maze:, start:, finish:, &callback)
@@ -18,15 +18,19 @@ class Maze
       self.failed_paths = []
       self.all_paths    = []
       self.success_path = []
+      self.stack        = []
     end
 
     def call
       explored << start
       callback.call start, self
-      stack = [[start, edges_for(start, nil)]]
+      stack.push [start, edges_for(start, nil)]
 
       while stack.any?
         parent, children = stack.last
+
+        # we may have explored it while going down one of its sibling paths
+        children.shift while children.first && explored.include?(children.first)
         next stack.pop if children.empty?
 
         current = children.shift
@@ -39,9 +43,8 @@ class Maze
         end
 
         edges = edges_for current, parent
-
-        add_path :failed, (stack.map(&:first) << current) if edges.empty?
         edges.reject! { |edge| explored.include? edge }
+        add_path :failed, (stack.map(&:first) << current) if edges.empty?
         stack.push [current, edges]
       end
       self

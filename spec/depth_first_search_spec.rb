@@ -63,4 +63,16 @@ test_dfs.call do
     expect(dfs.failed_paths).to eq [[[1,1], [2,1]]]
     expect(dfs.success_path).to eq []
   end
+
+  it 'doesn\'t re-traverse paths itself' do
+    dfs = dfs_for maze_for "######
+                            #   ##
+                            # # ##
+                            #   F#
+                            ### ##
+                            #S  ##
+                            ######"
+    expect(dfs.success_path).to eq [[1,5], [2,5], [3,5], [3,4], [3,3], [4,3]]
+    expect(dfs.failed_paths).to eq [[[1,5], [2,5], [3,5], [3,4], [3,3], [3,2], [3,1], [2,1], [1,1], [1,2], [1,3], [2,3]]]
+  end
 end

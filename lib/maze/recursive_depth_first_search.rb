@@ -36,7 +36,7 @@ class Maze
       else
         edges = edges_for current
         add_path :failed, path if edges.empty?
-        edges.find { |edge| recursive edge, path }
+        edges.find { |edge| recursive edge, path unless explored.include? edge }
       end
     end
 
