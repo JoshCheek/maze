@@ -9,7 +9,7 @@ class Maze
     NULL_CALLBACK = Proc.new { }
 
     attr_accessor :maze, :start, :finish, :on_search, :on_build_path
-    attr_accessor :came_from, :to_explore, :success_path, :failed_paths
+    attr_accessor :came_from, :to_explore, :success_path, :failed_paths, :all_paths
 
     def initialize(maze:, start:, finish:, on_search:NULL_CALLBACK, on_build_path:NULL_CALLBACK)
       self.maze          = maze
@@ -21,6 +21,7 @@ class Maze
       self.to_explore    = [start]           # a queue of where to search next
       self.failed_paths  = []
       self.success_path  = []
+      self.all_paths     = []
     end
 
     def explored
@@ -28,38 +29,55 @@ class Maze
     end
 
     def call
-      # search until we run out of places to look, or find the target
-      while finish != (current = to_explore.shift)
-        on_search.call current, self
-
-        edges = maze.edges_of(current)
-                    .select { |edge| maze.is? edge, traversable: true }
-                    .reject { |edge| came_from.key? edge              }
-
-        failed_paths << build_path(current) if edges.empty?
-
-        edges.each { |edge| came_from[edge] = current }
-             .each { |edge| to_explore << edge        }
-      end
-
-      path = build_path current
-      while path.any?
-        success_path.unshift path.pop
-        on_build_path.call success_path.first, self
-      end
-
+      found = search
+      build_success_path if found
       self
     end
 
     private
 
+    def search
+      while to_explore.any? && finish != (current = to_explore.shift)
+        on_search.call current, self
+        viable_edges_of(current)
+          .tap  { |edges| add_path :fail, build_path(current) if edges.empty? }
+          .each { |edge| came_from[edge] = current }
+          .each { |edge| to_explore << edge        }
+      end
+      current == finish
+    end
+
+    def viable_edges_of(cell)
+      maze.edges_of(cell)
+          .select { |edge| maze.is? edge, traversable: true }
+          .reject { |edge| came_from.key? edge              }
+    end
+
+    def build_success_path
+      build_path(finish).reverse.each do |cell|
+        success_path.unshift cell
+        on_build_path.call cell, self
+      end
+    end
+
+
     def build_path(cell)
+      return [] unless cell
       path = [cell]
       while cell != start
         cell = came_from[cell]
         path.unshift cell
       end
       path
+    end
+
+    def add_path(type, path)
+      all_paths << path
+      if type == :success
+        self.success_path = path
+      else
+        self.failed_paths << path
+      end
     end
   end
 end

@@ -79,4 +79,13 @@ RSpec.describe Maze::BreadthFirstSearch do
     expect(bfs.failed_paths.length).to eq 1
     expect(bfs.success_path.last).to eq [2, 5]
   end
+
+  it 'doesn\'t do stupid shit when it can\'t find the finish' do
+    bfs = bfs_for maze_for "######
+                            #S #F#
+                            ######"
+    expect(bfs.all_paths   ).to eq [[[1,1], [2,1]]]
+    expect(bfs.failed_paths).to eq [[[1,1], [2,1]]]
+    expect(bfs.success_path).to eq []
+  end
 end
