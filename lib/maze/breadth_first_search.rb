@@ -1,27 +1,23 @@
-require 'maze'
+require 'maze/search_helpers'
 
 class Maze
   class BreadthFirstSearch
+    include SearchHelpers
+
     def self.call(attrs)
       new(attrs).call
     end
 
     NULL_CALLBACK = Proc.new { }
 
-    attr_accessor :maze, :start, :finish, :on_search, :on_build_path
-    attr_accessor :came_from, :to_explore, :success_path, :failed_paths, :all_paths
+    attr_accessor :came_from, :to_explore, :on_search, :on_build_path
 
-    def initialize(maze:, start:, finish:, on_search:NULL_CALLBACK, on_build_path:NULL_CALLBACK)
-      self.maze          = maze
-      self.start         = start
-      self.finish        = finish
+    def initialize(on_search:NULL_CALLBACK, on_build_path:NULL_CALLBACK, **keyrest)
+      super(**keyrest)
       self.on_search     = on_search
       self.on_build_path = on_build_path
       self.came_from     = {start => start}  # record the how we got to each cell so we can reconstruct the path
-      self.to_explore    = [start]           # a queue of where to search next
-      self.failed_paths  = []
-      self.success_path  = []
-      self.all_paths     = []
+      self.to_explore    = [start]
     end
 
     def explored
@@ -39,18 +35,12 @@ class Maze
     def search
       while to_explore.any? && finish != (current = to_explore.shift)
         on_search.call current, self
-        viable_edges_of(current)
+        edges_for(current)
           .tap  { |edges| add_path :fail, build_path(current) if edges.empty? }
           .each { |edge| came_from[edge] = current }
           .each { |edge| to_explore << edge        }
       end
       current == finish
-    end
-
-    def viable_edges_of(cell)
-      maze.edges_of(cell)
-          .select { |edge| maze.is? edge, traversable: true }
-          .reject { |edge| came_from.key? edge              }
     end
 
     def build_success_path
@@ -60,24 +50,11 @@ class Maze
       end
     end
 
-
     def build_path(cell)
       return [] unless cell
       path = [cell]
-      while cell != start
-        cell = came_from[cell]
-        path.unshift cell
-      end
+      path.unshift(cell = came_from[cell]) while cell != start
       path
-    end
-
-    def add_path(type, path)
-      all_paths << path
-      if type == :success
-        self.success_path = path
-      else
-        self.failed_paths << path
-      end
     end
   end
 end

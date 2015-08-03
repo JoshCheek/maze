@@ -1,30 +1,25 @@
-require 'maze'
+require 'maze/search_helpers'
 
 class Maze
   class DepthFirstSearch
+    include SearchHelpers
+
     def self.call(attrs, &block)
       new(attrs, &block).call
     end
 
-    attr_accessor :maze, :start, :finish, :callback, :explored, :stack
-    attr_accessor :success_path, :failed_paths, :all_paths
+    attr_accessor :callback, :stack
 
-    def initialize(maze:, start:, finish:, &callback)
-      self.maze         = maze
-      self.start        = start
-      self.finish       = finish
-      self.callback     = callback || Proc.new { }
-      self.explored     = []
-      self.failed_paths = []
-      self.all_paths    = []
-      self.success_path = []
-      self.stack        = []
+    def initialize(**keyrest, &callback)
+      self.callback = callback || Proc.new { }
+      self.stack    = []
+      super(**keyrest)
     end
 
     def call
       explored << start
       callback.call start, self
-      stack.push [start, edges_for(start, nil)]
+      stack.push [start, edges_for(start)]
 
       while stack.any?
         parent, children = stack.last
@@ -42,29 +37,11 @@ class Maze
           break
         end
 
-        edges = edges_for current, parent
-        edges.reject! { |edge| explored.include? edge }
+        edges = edges_for current
         add_path :failed, (stack.map(&:first) << current) if edges.empty?
         stack.push [current, edges]
       end
       self
-    end
-
-    private
-
-    def add_path(type, path)
-      all_paths << path
-      if type == :success
-        self.success_path = path
-      else
-        self.failed_paths << path
-      end
-    end
-
-    def edges_for(cell, parent)
-      maze.edges_of(cell).select do |edge|
-        maze.is?(edge, traversable: true) && edge != parent
-      end
     end
   end
 end
