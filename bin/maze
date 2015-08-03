@@ -66,31 +66,20 @@ display.without_cursor do
 
   # =====  Breadth First Search  =====
   require 'maze/breadth_first_search'
-  on_search = lambda do |current, bfs|
+
+  Maze::BreadthFirstSearch.call maze:      maze,
+                                start:     maze.start,
+                                finish:    maze.finish,
+                                chunked_search: true,
+                                on_search: lambda { |current, bfs|
     display.call heading: {text: 'Breadth First Search: Searching', colour: :blue},
                  maze:    maze,
-                 green:   [current, bfs.start],
-                 blue:    bfs.explored,
-                 magenta: bfs.to_explore,
-                 red:     bfs.finish
-    sleep sleep_duration
-  end
-
-  on_build_path = lambda do |current, bfs|
-    display.call maze:    maze,
-                 heading: {text: 'Breadth First Search: Building Path', colour: :green},
-                 magenta: [bfs.start, bfs.finish],
                  green:   current,
-                 blue:    bfs.success_path,
+                 magenta: [bfs.start, bfs.finish],
+                 blue:    current.flat_map { |cell| bfs.path_to cell }.uniq,
                  orange:  bfs.explored
-    sleep sleep_duration
-  end
-
-  Maze::BreadthFirstSearch.call maze:          maze,
-                                start:         maze.start,
-                                finish:        maze.finish,
-                                on_search:     on_search,
-                                on_build_path: on_build_path
+    sleep 0.1
+  }
 
   puts display.colour("Press any key!", :red)
   $stdin.raw &:getc

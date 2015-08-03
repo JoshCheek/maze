@@ -4,9 +4,14 @@ require 'maze/breadth_first_search'
 RSpec.describe Maze::BreadthFirstSearch do
   include SpecHelpers
 
+  def bfs_for(maze, options={})
+    defaults = {maze: maze, start: maze.start, finish: maze.finish}
+    described_class.call defaults.merge(options)
+  end
+
   it 'searches nodes it finds in the order it finds them until it hits the end, then traces the path back' do
     events        = []
-    on_search     = lambda { |cell, bfs| events << [:search,     cell] }
+    on_search     = lambda { |cells, bfs| events << [:search,  *cells] }
     on_build_path = lambda { |cell, bfs| events << [:build_path, cell] }
     maze          = maze_for <<-MAZE
     #######
@@ -25,6 +30,7 @@ RSpec.describe Maze::BreadthFirstSearch do
       [:search,     [5, 1]],
       [:search,     [3, 3]],
       [:search,     [2, 3]],
+      [:search,     [1, 3]],
       [:build_path, [1, 3]],
       [:build_path, [2, 3]],
       [:build_path, [3, 3]],
@@ -40,9 +46,10 @@ RSpec.describe Maze::BreadthFirstSearch do
       [[1,1]],
       [[1,1],[2,1]],
       [[1,1],[2,1],[3,1]],
+      [[1,1],[2,1],[3,1]],
     ]
 
-    on_search = lambda { |cell, bfs| expect(bfs.explored).to eq seens.shift }
+    on_search = lambda { |cells, bfs| expect(bfs.explored).to eq seens.shift }
     maze      = maze_for <<-MAZE
     #####
     #S F#
@@ -61,11 +68,6 @@ RSpec.describe Maze::BreadthFirstSearch do
     #######
     MAZE
     expect(bfs_for(maze).success_path).to eq [[1,1], [2,1], [3,1], [3,2], [3,3], [2,3], [1,3]]
-  end
-
-  def bfs_for(maze, options={})
-    defaults = {maze: maze, start: maze.start, finish: maze.finish}
-    described_class.call defaults.merge(options)
   end
 
   it 'doesn\'t re-traverse paths it has already seen' do
@@ -87,5 +89,27 @@ RSpec.describe Maze::BreadthFirstSearch do
     expect(bfs.all_paths   ).to eq [[[1,1], [2,1]]]
     expect(bfs.failed_paths).to eq [[[1,1], [2,1]]]
     expect(bfs.success_path).to eq []
+  end
+
+  it 'accepts a chunked_search, which causes it to search all cells at a given distance simultaneously' do
+    searched_cells = []
+    bfs = bfs_for maze_for("#####
+                            # S #
+                            # # #
+                            #   #
+                            ## ##
+                            ##F##
+                            #####"),
+                  chunked_search: true,
+                  on_search: -> cells, bfs { searched_cells << cells }
+    expect(searched_cells).to eq [
+      [[2, 1]],
+      [[1, 1], [3, 1]],
+      [[1, 2], [3, 2]],
+      [[1, 3], [3, 3]],
+      [[2, 3]],
+      [[2, 4]],
+      [[2, 5]],
+    ]
   end
 end

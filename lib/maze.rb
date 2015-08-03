@@ -84,6 +84,14 @@ class Maze
     ]
   end
 
+  def each_cell
+    maze.each_with_index do |row, y|
+      row.each_index do |x|
+        yield [x, y]
+      end
+    end
+  end
+
   private
 
   attr_writer :start, :finish
