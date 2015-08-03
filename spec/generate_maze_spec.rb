@@ -72,5 +72,15 @@ RSpec.describe Maze::Generate do
       end
     end
 
+    it 'does not generate chunks of wall/path', t:true do
+      arys = Maze::Generate.call(width: 50, height: 50).to_raw_arrays
+      arys.each_cons 2 do |row1, row2|
+        row1.zip(row2).each_cons(2) do |cells|
+          cells = cells.flatten
+          expect(cells.uniq.length).to_not eq(1), "Cell block: #{cells.inspect}"
+        end
+      end
+    end
+
   end
 end
