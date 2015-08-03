@@ -37,10 +37,10 @@ class Maze
         end
       end
 
-      self.path = []
-      while current != came_from[current]
-        path << current
+      self.path = [finish]
+      while current != start
         current = came_from[current]
+        path.unshift current
         on_build_path.call current, self
       end
       path

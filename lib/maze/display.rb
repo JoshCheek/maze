@@ -29,10 +29,9 @@ class Maze
 
     attr_accessor :enabled, :stream, :colours
 
-    def initialize(enable:,
+    def initialize enable:,
                    stream:  (enable and raise ArgumentError, "A stream must be provided when Display is enabled!"),
                    colours: DEFAULT_COLOURS
-                  )
       self.colours = colours
       self.enabled = enable
       self.stream  = stream
