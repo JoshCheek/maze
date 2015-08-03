@@ -17,6 +17,7 @@ class Maze
       self.explored     = []
       self.failed_paths = []
       self.all_paths    = []
+      self.success_path = []
     end
 
     def call
@@ -34,7 +35,7 @@ class Maze
         true
       else
         edges = edges_for current
-        add_path :fail, path if edges.empty?
+        add_path :failed, path if edges.empty?
         edges.find { |edge| recursive edge, path }
       end
     end

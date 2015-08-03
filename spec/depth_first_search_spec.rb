@@ -54,4 +54,13 @@ test_dfs.call do
     expect(dfs.success_path).to eq success_path
     expect(dfs.all_paths   ).to eq all_paths
   end
+
+  it 'doesn\'t do stupid shit when it can\'t find the finish' do
+    dfs = dfs_for maze_for "######
+                            #S #F#
+                            ######"
+    expect(dfs.all_paths   ).to eq [[[1,1], [2,1]]]
+    expect(dfs.failed_paths).to eq [[[1,1], [2,1]]]
+    expect(dfs.success_path).to eq []
+  end
 end

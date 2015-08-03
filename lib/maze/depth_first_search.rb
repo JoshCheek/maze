@@ -17,6 +17,7 @@ class Maze
       self.explored     = []
       self.failed_paths = []
       self.all_paths    = []
+      self.success_path = []
     end
 
     def call
@@ -24,31 +25,25 @@ class Maze
       callback.call start, self
       stack = [[start, edges_for(start, nil)]]
 
-      loop do
+      while stack.any?
         parent, children = stack.last
-
-        if children.empty?
-          stack.pop
-          next
-        end
+        next stack.pop if children.empty?
 
         current = children.shift
         explored << current
         callback.call current, self
 
         if current == finish
-          stack.push [current, []]
+          add_path :success, (stack.map(&:first) << current)
           break
         end
 
         edges = edges_for current, parent
 
         add_path :failed, (stack.map(&:first) << current) if edges.empty?
-
         edges.reject! { |edge| explored.include? edge }
         stack.push [current, edges]
       end
-      add_path :success, stack.map(&:first)
       self
     end
 
