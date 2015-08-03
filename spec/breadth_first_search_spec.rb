@@ -15,7 +15,7 @@ RSpec.describe Maze::BreadthFirstSearch do
     #F  ###
     #######
     MAZE
-    described_class.call maze: maze, start: maze.start, finish: maze.finish, on_search: on_search, on_build_path: on_build_path
+    bfs_for maze, on_search: on_search, on_build_path: on_build_path
     expect(events).to eq [
       [:search,     [1, 1]],
       [:search,     [2, 1]],
@@ -48,8 +48,8 @@ RSpec.describe Maze::BreadthFirstSearch do
     #S F#
     #####
     MAZE
-    bfs = described_class.call maze: maze, start: maze.start, finish: maze.finish, on_search: on_search
-    expect(bfs.explored).to eq seens.shift
+    explored = bfs_for(maze, on_search: on_search).explored
+    expect(explored).to eq seens.shift
   end
 
   it 'returns the path from the start to the finish' do
@@ -60,12 +60,12 @@ RSpec.describe Maze::BreadthFirstSearch do
     #F  ###
     #######
     MAZE
-    bfs = described_class.call maze: maze, start: maze.start, finish: maze.finish
-    expect(bfs.success_path).to eq [[1,1], [2,1], [3,1], [3,2], [3,3], [2,3], [1,3]]
+    expect(bfs_for(maze).success_path).to eq [[1,1], [2,1], [3,1], [3,2], [3,3], [2,3], [1,3]]
   end
 
-  def bfs_for(maze)
-    described_class.call maze: maze, start: maze.start, finish: maze.finish
+  def bfs_for(maze, options={})
+    defaults = {maze: maze, start: maze.start, finish: maze.finish}
+    described_class.call defaults.merge(options)
   end
 
   it 'doesn\'t re-traverse paths it has already seen' do

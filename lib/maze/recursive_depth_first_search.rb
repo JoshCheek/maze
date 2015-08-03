@@ -11,8 +11,8 @@ class Maze
     attr_accessor :callback
 
     def initialize(attrs, &callback)
-      self.callback = callback || Proc.new { }
       super(attrs)
+      self.callback = callback || Proc.new { }
     end
 
     def call

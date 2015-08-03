@@ -11,9 +11,9 @@ class Maze
     attr_accessor :callback, :stack
 
     def initialize(**keyrest, &callback)
+      super(**keyrest)
       self.callback = callback || Proc.new { }
       self.stack    = []
-      super(**keyrest)
     end
 
     def call
