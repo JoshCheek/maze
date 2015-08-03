@@ -3,12 +3,7 @@ require 'maze/generate_lsystem'
 
 RSpec.describe Maze::GenerateLsystem do
   def hilbert(n)
-    described_class.call times: n,
-                         axiom: "A",
-                         rules: {
-                           "A" => "-BF+AFA+FB-",
-                           "B" => "+AF-BFB-FA+",
-                         }
+    described_class.hilbert(n)
   end
 
   it 'generates a hilbert curve from the lsystem' do
@@ -17,13 +12,13 @@ RSpec.describe Maze::GenerateLsystem do
     }.join
 
     expect(maze_str).to eq "#########\n" +
-                           "#   #   #\n" +
-                           "# # # # #\n" +
-                           "# #   # #\n" +
-                           "# ##### #\n" +
-                           "#   #   #\n" +
-                           "### # ###\n" +
-                           "#   #   #\n" +
+                           "#### ####\n" +
+                           "## # # ##\n" +
+                           "## ### ##\n" +
+                           "##     ##\n" +
+                           "#### ####\n" +
+                           "#  # #  #\n" +
+                           "#### ####\n" +
                            "#########\n"
   end
 

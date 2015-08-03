@@ -1,6 +1,17 @@
+require 'set'
 require 'maze'
+
 class Maze
   class GenerateLsystem
+    def self.hilbert(n)
+      GenerateLsystem.call times: n,
+                           axiom: "A",
+                           rules: {
+                             "A" => "-BF+AFA+FB-",
+                             "B" => "+AF-BFB-FA+",
+                           }
+    end
+
     def self.call(attrs)
       new(attrs).call
     end
@@ -62,9 +73,15 @@ class Maze
     end
 
     def maze_for(path)
-      xmax, ymax = path.transpose.map(&:max)
-      maze = Maze.new width: xmax+3, height: ymax+3
-      path.each { |(x, y)| maze.set(:path, [x+1, y+1]) }
+      walls = Set.new path.map { |x, y| [x+1, y+1] }
+      xmax, ymax = walls.to_a.transpose.map(&:max)
+      maze = Maze.new width: xmax+2, height: ymax+2
+      1.upto(ymax) do |y|
+        1.upto(xmax) do |x|
+          cell = [x, y]
+          maze.set :path, cell unless walls.include? cell
+        end
+      end
       maze
     end
 
