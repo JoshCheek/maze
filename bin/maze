@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby -s
+require 'io/console'
 
 default_width  = 40
 default_height = 30
@@ -44,10 +45,10 @@ at_exit { puts "call with -s=#{random_seed} to get this maze again" }
 # =====  Other config  =====
 require 'maze/display'
 display = Maze::Display.new enable: true, stream: $stdout
-sleep_duration = if 1000 < maze_width * maze_height
-  sleep 0.01
+sleep_duration = if 1500 > maze_width * maze_height
+  0.01
 else
-  sleep 0.001
+  0.001
 end
 
 # ===== Main  =====
@@ -92,7 +93,7 @@ display.without_cursor do
                                 on_build_path: on_build_path
 
   puts display.colour("Press any key!", :red)
-  gets
+  $stdin.raw &:getc
   display.clear
 
   # =====  Depth First Search  =====
@@ -101,8 +102,8 @@ display.without_cursor do
   dfs = Maze::DepthFirstSearch.call maze: maze, start: maze.start, finish: maze.finish do |current, dfs|
     display.call maze:    maze,
                  heading: {text: 'Depth First Search: Searching', colour: :blue},
-                 green:   current,
-                 blue:    dfs.explored,
+                 blue:    [*dfs.stack.map(&:first), current],
+                 orange:  dfs.explored,
                  red:     dfs.finish
     sleep sleep_duration
   end
