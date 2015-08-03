@@ -11,15 +11,15 @@ RSpec.describe Maze::GenerateLsystem do
       row.map { |c| c == :wall ? '#' : " " } << "\n"
     }.join
 
-    expect(maze_str).to eq "#########\n" +
-                           "#### ####\n" +
-                           "## # # ##\n" +
-                           "## ### ##\n" +
-                           "##     ##\n" +
-                           "#### ####\n" +
-                           "#  # #  #\n" +
-                           "#### ####\n" +
-                           "#########\n"
+    expect(maze_str).to match /#########\n
+                               #### ####\n
+                               ## . . ##\n
+                               ## #.# ##\n
+                               ##     ##\n
+                               ##.# #.##\n
+                               #  . .  #\n
+                               #### ####\n
+                               #########\n/x
   end
 
   it 'picks a random start' do
@@ -31,6 +31,30 @@ RSpec.describe Maze::GenerateLsystem do
     finishes = 10.times.map { hilbert(2).finish }.uniq
     expect(finishes.uniq.length).to be > 1
   end
+
+  it 'gives padding around the edge to prevent islands' do
+    path_cells = Set.new
+    maze       = hilbert(2)
+    maze.each_cell { |cell| path_cells << cell if maze.is? cell, traversable: true }
+    connected = Set.new << path_cells.first
+
+    loop do
+      break if path_cells.empty?
+      to_reject = path_cells.select do |(x, y)|
+        connected.include?([x-1, y  ]) ||
+        connected.include?([x+1, y  ]) ||
+        connected.include?([x  , y-1]) ||
+        connected.include?([x  , y+1])
+      end
+
+      break if to_reject.empty?
+      path_cells -= to_reject
+      connected += to_reject
+    end
+
+    expect(path_cells).to be_empty
+  end
+
 end
 
 

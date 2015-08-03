@@ -26,9 +26,11 @@ class Maze
 
     def call
       production = production_for(times, axiom, rules)
-      path       = normalize traverse production
+      path       = traverse production
+      path       = normalize path
       maze       = maze_for path
-      add_start_and_finish maze
+      maze       = add_start_and_finish maze
+      maze
     end
 
     def production_for(times, axiom, rules)
@@ -73,11 +75,11 @@ class Maze
     end
 
     def maze_for(path)
-      walls = Set.new path.map { |x, y| [x+1, y+1] }
+      walls = Set.new path.map { |x, y| [x+2, y+2] }
       xmax, ymax = walls.to_a.transpose.map(&:max)
-      maze = Maze.new width: xmax+2, height: ymax+2
-      1.upto(ymax) do |y|
-        1.upto(xmax) do |x|
+      maze = Maze.new width: xmax+3, height: ymax+3
+      1.upto ymax+1 do |y|
+        1.upto xmax+1 do |x|
           cell = [x, y]
           maze.set :path, cell unless walls.include? cell
         end
