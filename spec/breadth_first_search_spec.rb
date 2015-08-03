@@ -2,26 +2,7 @@ require 'spec_helper'
 require 'maze/breadth_first_search'
 
 RSpec.describe Maze::BreadthFirstSearch do
-  def type_for(char)
-    case char
-    when '#' then Maze::WALL
-    when ' ' then Maze::PATH
-    when 'S' then Maze::START
-    when 'F' then Maze::FINISH
-    else raise "WAT: #{char}"
-    end
-  end
-
-  def maze_for(maze_str)
-    maze_str = maze_str.gsub /^\s*/, ''
-    maze     = Maze.new width: maze_str.length, height: maze_str.lines.first.length
-    maze_str.lines.each_with_index do |line, y|
-      line.chomp.chars.each_with_index do |char, x|
-        maze.set type_for(char), [x, y]
-      end
-    end
-    maze
-  end
+  include SpecHelpers
 
   it 'searches nodes it finds in the order it finds them until it hits the end, then traces the path back' do
     events        = []
