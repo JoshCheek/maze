@@ -25,6 +25,7 @@ RSpec.describe Maze::BreadthFirstSearch do
       [:search,     [5, 1]],
       [:search,     [3, 3]],
       [:search,     [2, 3]],
+      [:build_path, [1, 3]],
       [:build_path, [2, 3]],
       [:build_path, [3, 3]],
       [:build_path, [3, 2]],
@@ -47,8 +48,7 @@ RSpec.describe Maze::BreadthFirstSearch do
     #S F#
     #####
     MAZE
-    bfs = described_class.new maze: maze, start: maze.start, finish: maze.finish, on_search: on_search
-    bfs.call
+    bfs = described_class.call maze: maze, start: maze.start, finish: maze.finish, on_search: on_search
     expect(bfs.explored).to eq seens.shift
   end
 
@@ -60,7 +60,23 @@ RSpec.describe Maze::BreadthFirstSearch do
     #F  ###
     #######
     MAZE
-    path = described_class.call maze: maze, start: maze.start, finish: maze.finish
-    expect(path).to eq [[1,1], [2,1], [3,1], [3,2], [3,3], [2,3], [1,3]]
+    bfs = described_class.call maze: maze, start: maze.start, finish: maze.finish
+    expect(bfs.success_path).to eq [[1,1], [2,1], [3,1], [3,2], [3,3], [2,3], [1,3]]
+  end
+
+  def bfs_for(maze)
+    described_class.call maze: maze, start: maze.start, finish: maze.finish
+  end
+
+  it 'doesn\'t re-traverse paths it has already seen' do
+    bfs = bfs_for maze_for "#####
+                            # S #
+                            # # #
+                            #   #
+                            ## ##
+                            ##F##
+                            #####"
+    expect(bfs.failed_paths.length).to eq 1
+    expect(bfs.success_path.last).to eq [2, 5]
   end
 end

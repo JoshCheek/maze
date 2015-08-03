@@ -87,7 +87,8 @@ module SpecHelpers
 
   def maze_for(maze_str)
     maze_str = maze_str.gsub /^\s*/, ''
-    maze     = Maze.new width: maze_str.length, height: maze_str.lines.first.length
+    maze     = Maze.new width:  maze_str.lines.first.length,
+                        height: maze_str.lines.length
     maze_str.lines.each_with_index do |line, y|
       line.chomp.chars.each_with_index do |char, x|
         maze.set type_for(char), [x, y]

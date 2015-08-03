@@ -80,7 +80,7 @@ display.without_cursor do
                  heading: {text: 'Breadth First Search: Building Path', colour: :green},
                  magenta: [bfs.start, bfs.finish],
                  green:   current,
-                 blue:    bfs.path,
+                 blue:    bfs.success_path,
                  orange:  bfs.explored
     sleep sleep_duration
   end
