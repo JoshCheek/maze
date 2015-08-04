@@ -6,20 +6,42 @@ RSpec.describe Maze::GenerateLsystem do
     described_class.hilbert(n)
   end
 
+  def dragon(n)
+    described_class.dragon(n)
+  end
+
   it 'generates a hilbert curve from the lsystem' do
     maze_str = hilbert(2).to_raw_arrays.map { |row|
       row.map { |c| c == :wall ? '#' : " " } << "\n"
     }.join
 
-    expect(maze_str).to match /#########\n
-                               #### ####\n
-                               ## . . ##\n
-                               ## #.# ##\n
-                               ##     ##\n
-                               ##.# #.##\n
-                               #  . .  #\n
-                               #### ####\n
-                               #########\n/x
+    expect(maze_str).to eq "###########\n" +
+                           "#         #\n" +
+                           "# ### ### #\n" +
+                           "# # # # # #\n" +
+                           "# # ### # #\n" +
+                           "# #     # #\n" +
+                           "# ### ### #\n" +
+                           "#   # #   #\n" +
+                           "# ### ### #\n" +
+                           "#         #\n" +
+                           "###########\n"
+  end
+
+  it 'generates a dragon curve lsystem' do
+    maze_str = dragon(3).to_raw_arrays.map { |row|
+      row.map { |c| c == :wall ? '#' : " " } << "\n"
+    }.join
+
+    expect(maze_str).to eq "###########\n" +
+                           "#         #\n" +
+                           "#     ### #\n" +
+                           "#       # #\n" +
+                           "# ### ### #\n" +
+                           "# # # #   #\n" +
+                           "# # ###   #\n" +
+                           "#         #\n" +
+                           "###########\n"
   end
 
   it 'picks a random start' do
@@ -59,15 +81,6 @@ end
 
 
 __END__
-  * Hilbert
-    - Axiom: A
-    - A -> - B F + A F A + F B -
-    - B -> + A F - B F B - F A +
-  * Dragon Curve L-System:
-    - Axiom: FX
-    - X -> X+YF
-    - Y -> FX-Y
-    - Use 90 degree turns
   * Quadratic Fractal:
     - Axiom: F+F+F+F
     - F -> F+F-F

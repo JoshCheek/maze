@@ -6,7 +6,7 @@ require 'io/console'
 
 default_width  = 40
 default_height = 30
-generators     = %w[recursive hilbert]
+generators     = %w[recursive hilbert dragon]
 
 # =====  Half-assed help screen  =====
 instructions = <<INSTRUCTIONS
@@ -73,6 +73,10 @@ display.without_cursor do
   elsif $g == 'hilbert'
     require 'maze/generate_lsystem'
     maze = Maze::GenerateLsystem.hilbert(5)
+    display.call maze: maze
+  elsif $g == 'dragon'
+    require 'maze/generate_lsystem'
+    maze = Maze::GenerateLsystem.dragon(10)
     display.call maze: maze
   else raise "Unknown generator: #{$g.inspect}"
   end

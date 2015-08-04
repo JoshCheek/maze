@@ -12,6 +12,15 @@ class Maze
                            }
     end
 
+    def self.dragon(n)
+      GenerateLsystem.call times: n,
+                           axiom: 'FX',
+                           rules: {
+                             "X" => "X+YF",
+                             "Y" => "FX-Y",
+                           }
+    end
+
     def self.call(attrs)
       new(attrs).call
     end
