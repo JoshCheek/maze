@@ -51,6 +51,15 @@ class Maze
                            }
     end
 
+    def self.peano(n)
+      GenerateLsystem.call invert: false,
+                           times:  n,
+                           axiom:  'F',
+                           rules:  {
+                             'F' => 'F+F-F-F-F+F+F+F-F'
+                           }
+    end
+
     def self.call(attrs)
       new(attrs).call
     end
