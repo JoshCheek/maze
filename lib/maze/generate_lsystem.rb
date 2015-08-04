@@ -23,6 +23,15 @@ class Maze
                            }
     end
 
+    def self.quadratic_fractal(n)
+      GenerateLsystem.call invert: false,
+                           times:  n,
+                           axiom:  'F+F+F+F',
+                           rules:  {
+                             "F" => "F+F-F",
+                           }
+    end
+
     def self.call(attrs)
       new(attrs).call
     end

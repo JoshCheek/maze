@@ -5,9 +5,11 @@ RSpec.describe Maze::GenerateLsystem do
   def hilbert(n)
     described_class.hilbert(n)
   end
-
   def dragon(n)
     described_class.dragon(n)
+  end
+  def quadratic(n)
+    described_class.quadratic_fractal(n)
   end
 
   it 'generates a hilbert curve from the lsystem' do
@@ -40,6 +42,22 @@ RSpec.describe Maze::GenerateLsystem do
                            "# # # ###\n" +
                            "# #   #  \n" +
                            "#######  \n"
+  end
+
+  it 'generates a quadratic fractal' do
+    maze_str = quadratic(1).to_raw_arrays.map { |row|
+      row.map { |c| c == :wall ? '#' : " " } << "\n"
+    }.join
+
+    expect(maze_str).to eq "  #####  \n" +
+                           "  #   #  \n" +
+                           "### # ###\n" +
+                           "#   #   #\n" +
+                           "# ##### #\n" +
+                           "#   #   #\n" +
+                           "### # ###\n" +
+                           "  #   #  \n" +
+                           "  #####  \n"
   end
 
   it 'picks a random start' do
@@ -79,10 +97,6 @@ end
 
 
 __END__
-  * Quadratic Fractal:
-    - Axiom: F+F+F+F
-    - F -> F+F-F
-    - Use 90 degree turns
   * Koch Curve Variant:
     - Axiom = F
     - F -> F+F-F-F+F
