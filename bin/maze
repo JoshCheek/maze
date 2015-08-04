@@ -1,8 +1,12 @@
 #!/usr/bin/env ruby -s
 require 'io/console'
 
+# hilbert at 5, and
+# -s=154679584488870479985208650597383425307
+
 default_width  = 40
 default_height = 30
+generators     = %w[recursive hilbert]
 
 # =====  Half-assed help screen  =====
 instructions = <<INSTRUCTIONS
@@ -20,6 +24,7 @@ Options
   -w=123       # Set the maze width (defaults to #{default_width})
   -h=123       # Set the maze height (defaults to #{default_height})
   -s=123       # Set the random seed (defaults to whatever Ruby initializes it with)
+  -g=generator # Choose the maze generator from (#{generators.join ', '}) -- default is Random
 INSTRUCTIONS
 
 at_exit { puts instructions if $! && !$!.kind_of?(SystemExit) }
@@ -44,42 +49,49 @@ at_exit { puts "call with -s=#{random_seed} to get this maze again" }
 
 # =====  Other config  =====
 require 'maze/display'
-display = Maze::Display.new enable: true, stream: $stdout
-sleep_duration = if 1500 > maze_width * maze_height
-  0.01
-else
-  0.001
-end
+display   = Maze::Display.new enable: true, stream: $stdout
+num_cells = maze_width * maze_height
+maze_size = if num_cells < 1500
+              :medium
+            elsif num_cells < 3000
+              :large
+            else
+              :massive
+            end
 
 # ===== Main  =====
 display.clear
 
 display.without_cursor do
   # =====  Generate the maze  =====
-  require 'maze/generate'
-  maze = Maze::Generate.call width: maze_width, height: maze_height do |cell, generator|
-    display.call maze:    generator.maze,
-                 heading: {text: "Gnerating", colour: :red},
-                 green:   cell
-    sleep sleep_duration
+  $g ||= generators.sample
+  if $g == 'recursive'
+    require 'maze/generate'
+    maze = Maze::Generate.call width: maze_width, height: maze_height do |cell, generator|
+      display.call maze: generator.maze, heading: {text: "Gnerating", colour: :red}, green: cell
+    end
+  elsif $g == 'hilbert'
+    require 'maze/generate_lsystem'
+    maze = Maze::GenerateLsystem.hilbert(5)
+    display.call maze: maze
+  else raise "Unknown generator: #{$g.inspect}"
   end
 
   # =====  Breadth First Search  =====
   require 'maze/breadth_first_search'
-
-  Maze::BreadthFirstSearch.call maze:      maze,
-                                start:     maze.start,
-                                finish:    maze.finish,
+  Maze::BreadthFirstSearch.call maze:           maze,
+                                start:          maze.start,
+                                finish:         maze.finish,
                                 chunked_search: true,
-                                on_search: lambda { |current, bfs|
-    display.call heading: {text: 'Breadth First Search: Searching', colour: :blue},
-                 maze:    maze,
-                 green:   current,
-                 magenta: [bfs.start, bfs.finish],
-                 blue:    current.flat_map { |cell| bfs.path_to cell }.uniq,
-                 orange:  bfs.explored
-    sleep 0.1
-  }
+                                on_search:      lambda { |current, bfs|
+                                  display.call heading: {text: 'Breadth First Search: Searching', colour: :blue},
+                                               maze:    maze,
+                                               green:   current,
+                                               magenta: [bfs.start, bfs.finish],
+                                               blue:    current.flat_map { |cell| bfs.path_to cell }.uniq,
+                                               orange:  bfs.explored
+                                  sleep 0.01
+                                }
 
   puts display.colour("Press any key!", :red)
   $stdin.raw &:getc
@@ -87,30 +99,14 @@ display.without_cursor do
 
   # =====  Depth First Search  =====
   require 'maze/depth_first_search'
-
   dfs = Maze::DepthFirstSearch.call maze: maze, start: maze.start, finish: maze.finish do |current, dfs|
     display.call maze:    maze,
                  heading: {text: 'Depth First Search: Searching', colour: :blue},
-                 blue:    [*dfs.stack.map(&:first), current],
+                 green:   current,
+                 magenta: [maze.start, maze.finish],
+                 blue:    dfs.stack.map(&:first),
                  orange:  dfs.explored,
                  red:     dfs.finish
-    sleep sleep_duration
+    sleep 0.001
   end
-
-  failed_sleep_duration = 1
-  failed_sleep_duration *= 0.5 if dfs.failed_paths.length > 20
-
-  dfs.failed_paths.each do |failed_path|
-    display.call maze:    maze,
-                 heading: {text: 'Depth First Search: Showing Dead Ends', colour: :blue},
-                 green:   [maze.start, maze.finish],
-                 red:     failed_path,
-                 blue:    dfs.success_path
-    sleep failed_sleep_duration
-  end
-
-  display.call maze:    maze,
-               heading: {text: 'Depth First Search: Success Path', colour: :blue},
-               green:   [maze.start, maze.finish],
-               blue:    dfs.success_path
 end
