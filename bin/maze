@@ -6,7 +6,7 @@ require 'io/console'
 
 default_width  = 40
 default_height = 30
-generators     = %w[recursive hilbert dragon quadratic]
+generators     = %w[recursive hilbert dragon quadratic koch]
 
 # =====  Half-assed help screen  =====
 instructions = <<INSTRUCTIONS
@@ -81,6 +81,10 @@ display.without_cursor do
   elsif $g == 'quadratic'
     require 'maze/generate_lsystem'
     maze = Maze::GenerateLsystem.quadratic_fractal(3)
+    display.call maze: maze
+  elsif $g == 'koch'
+    require 'maze/generate_lsystem'
+    maze = Maze::GenerateLsystem.koch(4)
     display.call maze: maze
   else raise "Unknown generator: #{$g.inspect}"
   end
