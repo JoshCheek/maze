@@ -27,18 +27,14 @@ class Maze
       GenerateLsystem.call invert: false,
                            times:  n,
                            axiom:  'F+F+F+F',
-                           rules:  {
-                             "F" => "F+F-F",
-                           }
+                           rules:  { "F" => "F+F-F" }
     end
 
     def self.koch(n)
       GenerateLsystem.call invert: false,
                            times:  n,
                            axiom:  'F',
-                           rules:  {
-                             "F" => "F+F-F-F+F",
-                           }
+                           rules:  { "F" => "F+F-F-F+F" }
     end
 
     def self.hilbert2(n)
@@ -55,9 +51,14 @@ class Maze
       GenerateLsystem.call invert: false,
                            times:  n,
                            axiom:  'F',
-                           rules:  {
-                             'F' => 'F+F-F-F-F+F+F+F-F'
-                           }
+                           rules:  { 'F' => 'F+F-F-F-F+F+F+F-F' }
+    end
+
+    def self.square(n)
+      GenerateLsystem.call invert: false,
+                           times:  n,
+                           axiom:  'X',
+                           rules:  { 'X' => 'XF-F+F-XF+F+XF-F+F-X' }
     end
 
     def self.call(attrs)

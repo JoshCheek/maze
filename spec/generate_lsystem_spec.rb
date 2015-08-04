@@ -20,6 +20,9 @@ RSpec.describe Maze::GenerateLsystem do
   def peano(n)
     described_class.peano(n)
   end
+  def square(n)
+    described_class.square(n)
+  end
 
   it 'generates a hilbert curve from the lsystem' do
     maze_str = hilbert(2).to_raw_arrays.map { |row|
@@ -109,6 +112,20 @@ RSpec.describe Maze::GenerateLsystem do
                            "### # ###\n" +
                            "  #   #  \n" +
                            "  #####  \n"
+  end
+
+  it 'generates a square curve' do
+    maze_str = square(1).to_raw_arrays.map { |row|
+      row.map { |c| c == :wall ? '#' : " " } << "\n"
+    }.join
+
+    expect(maze_str).to eq "    #####  \n" +
+                           "    #   #  \n" +
+                           "  ### # ###\n" +
+                           "  #   #   #\n" +
+                           "### ##### #\n" +
+                           "#   #   # #\n" +
+                           "#####   ###\n"
   end
 
   it 'picks a random start' do

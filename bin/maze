@@ -90,6 +90,9 @@ display.without_cursor do
   elsif $g == 'peano'
     maze = Maze::GenerateLsystem.peano(3)
     display.call maze: maze
+  elsif $g == 'square'
+    maze = Maze::GenerateLsystem.square(4)
+    display.call maze: maze
   else raise "Unknown generator: #{$g.inspect}"
   end
 
