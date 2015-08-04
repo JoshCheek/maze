@@ -64,27 +64,28 @@ display.clear
 
 display.without_cursor do
   # =====  Generate the maze  =====
+  require 'maze/generate'
+  require 'maze/generate_lsystem'
+
   $g ||= generators.sample
   if $g == 'recursive'
-    require 'maze/generate'
     maze = Maze::Generate.call width: maze_width, height: maze_height do |cell, generator|
       display.call maze: generator.maze, heading: {text: "Gnerating", colour: :red}, green: cell
     end
   elsif $g == 'hilbert'
-    require 'maze/generate_lsystem'
     maze = Maze::GenerateLsystem.hilbert(5)
     display.call maze: maze
   elsif $g == 'dragon'
-    require 'maze/generate_lsystem'
     maze = Maze::GenerateLsystem.dragon(10)
     display.call maze: maze
   elsif $g == 'quadratic'
-    require 'maze/generate_lsystem'
     maze = Maze::GenerateLsystem.quadratic_fractal(3)
     display.call maze: maze
   elsif $g == 'koch'
-    require 'maze/generate_lsystem'
     maze = Maze::GenerateLsystem.koch(4)
+    display.call maze: maze
+  elsif $g == 'hilbert2'
+    maze = Maze::GenerateLsystem.hilbert2(3)
     display.call maze: maze
   else raise "Unknown generator: #{$g.inspect}"
   end

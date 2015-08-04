@@ -41,6 +41,16 @@ class Maze
                            }
     end
 
+    def self.hilbert2(n)
+      GenerateLsystem.call invert: true,
+                           times:  n,
+                           axiom:  'X',
+                           rules:  {
+                             "X" => "XFYFX+F+YFXFY-F-XFYFX",
+                             "Y" => "YFXFY-F-XFYFX+F+YFXFY",
+                           }
+    end
+
     def self.call(attrs)
       new(attrs).call
     end

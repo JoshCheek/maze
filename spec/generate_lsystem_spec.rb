@@ -14,6 +14,9 @@ RSpec.describe Maze::GenerateLsystem do
   def koch(n)
     described_class.koch(n)
   end
+  def hilbert2(n)
+    described_class.hilbert2(n)
+  end
 
   it 'generates a hilbert curve from the lsystem' do
     maze_str = hilbert(2).to_raw_arrays.map { |row|
@@ -73,6 +76,22 @@ RSpec.describe Maze::GenerateLsystem do
                            "### # ###\n" +
                            "  #   #  \n" +
                            "  #####  \n"
+  end
+
+  it 'generates a hilbert 2 curve' do
+    maze_str = hilbert2(1).to_raw_arrays.map { |row|
+      row.map { |c| c == :wall ? '#' : " " } << "\n"
+    }.join
+
+    expect(maze_str).to eq "#########\n" +
+                           "#       #\n" +
+                           "# ##### #\n" +
+                           "#     # #\n" +
+                           "# ##### #\n" +
+                           "# #     #\n" +
+                           "# ##### #\n" +
+                           "#       #\n" +
+                           "#########\n"
   end
 
   it 'picks a random start' do
