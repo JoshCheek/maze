@@ -40,7 +40,7 @@ class Maze
     alias enabled? enabled
 
     def call(maze:, **options)
-      heading        = options.delete(:heading) || {text: "Debugging (#{caller[0]})", colour: :red}
+      heading    = options.delete(:heading) || {text: "Debugging (#{caller[0]})", colour: :red}
       maze_array = maze.to_raw_arrays
       options.each do |colour, cells|
         cells = [cells] if cells.kind_of?(Array) && cells[0].kind_of?(Fixnum)
@@ -101,11 +101,12 @@ class Maze
 
     def text_for(cell)
       case cell
-      when Maze::WALL   then '##'
-      when Maze::PATH   then '  '
-      when Maze::START  then ' S'
-      when Maze::FINISH then ' F'
-      when String       then cell
+      when Maze::WALL        then '##'
+      when Maze::PATH        then '  '
+      when Maze::START       then ' S'
+      when Maze::FINISH      then ' F'
+      when Maze::INVISI_WALL then '  '
+      when String            then cell
       else raise "WTF IS #{cell.inspect}"
       end
     end

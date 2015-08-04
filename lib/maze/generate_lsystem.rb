@@ -42,6 +42,7 @@ class Maze
       path       = normalize path
       maze       = maze_for path, invert: invert
       maze       = add_start_and_finish maze
+      maze       = trim_wall_masses     maze
       maze
     end
 
@@ -120,6 +121,14 @@ class Maze
       finish = maze.random_cell type: :path while start == finish
       maze.set :start,  start
       maze.set :finish, finish
+      maze
+    end
+
+    def trim_wall_masses(maze)
+      maze.each_cell do |cell|
+        next if maze.neighbours_of(cell).any? { |n| maze.is? n, traversable: true }
+        maze.set :invisible_wall, cell
+      end
       maze
     end
   end

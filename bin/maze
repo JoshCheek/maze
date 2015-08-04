@@ -72,7 +72,7 @@ display.without_cursor do
     end
   elsif $g == 'hilbert'
     require 'maze/generate_lsystem'
-    maze = Maze::GenerateLsystem.hilbert(5, invert: true)
+    maze = Maze::GenerateLsystem.hilbert(5)
     display.call maze: maze
   elsif $g == 'dragon'
     require 'maze/generate_lsystem'

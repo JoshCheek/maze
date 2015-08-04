@@ -1,10 +1,11 @@
 class Maze
-  WALL       = :wall
-  PATH       = :path
-  START      = :start
-  FINISH     = :finish
-  ALL        = [WALL, PATH, START, FINISH].freeze
-  PATH_CELLS = (ALL - [WALL]).freeze
+  WALL        = :wall
+  INVISI_WALL = :invisible_wall
+  PATH        = :path
+  START       = :start
+  FINISH      = :finish
+  ALL         = [WALL, PATH, INVISI_WALL, START, FINISH].freeze
+  PATH_CELLS  = (ALL - [WALL, INVISI_WALL]).freeze
 
   attr_reader :width, :height, :start, :finish
 
@@ -48,6 +49,10 @@ class Maze
 
   def corners_of((x,y))
     [[x-1, y-1], [x+1, y-1], [x-1, y+1], [x+1, y+1]].select { |e| on_board? e }
+  end
+
+  def neighbours_of(cell)
+    edges_of(cell) + corners_of(cell)
   end
 
   def on_board?((x, y))
