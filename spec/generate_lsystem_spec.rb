@@ -33,15 +33,13 @@ RSpec.describe Maze::GenerateLsystem do
       row.map { |c| c == :wall ? '#' : " " } << "\n"
     }.join
 
-    expect(maze_str).to eq "###########\n" +
-                           "#         #\n" +
-                           "#     ### #\n" +
-                           "#       # #\n" +
-                           "# ### ### #\n" +
-                           "# # # #   #\n" +
-                           "# # ###   #\n" +
-                           "#         #\n" +
-                           "###########\n"
+    expect(maze_str).to eq "#########\n" +
+                           "#####   #\n" +
+                           "####### #\n" +
+                           "#   #   #\n" +
+                           "# # # ###\n" +
+                           "# #   ###\n" +
+                           "#########\n"
   end
 
   it 'picks a random start' do

@@ -4,18 +4,20 @@ require 'maze'
 class Maze
   class GenerateLsystem
     def self.hilbert(n)
-      GenerateLsystem.call times: n,
-                           axiom: "A",
-                           rules: {
+      GenerateLsystem.call invert: true,
+                           times:  n,
+                           axiom:  "A",
+                           rules:  {
                              "A" => "-BF+AFA+FB-",
                              "B" => "+AF-BFB-FA+",
                            }
     end
 
     def self.dragon(n)
-      GenerateLsystem.call times: n,
-                           axiom: 'FX',
-                           rules: {
+      GenerateLsystem.call invert: false,
+                           times:  n,
+                           axiom:  'FX',
+                           rules:  {
                              "X" => "X+YF",
                              "Y" => "FX-Y",
                            }
@@ -25,19 +27,20 @@ class Maze
       new(attrs).call
     end
 
-    attr_accessor :times, :axiom, :rules
+    attr_accessor :times, :axiom, :rules, :invert
 
-    def initialize(times:, axiom:, rules:)
-      self.times     = times
-      self.axiom     = axiom
-      self.rules     = rules
+    def initialize(times:, axiom:, rules:, invert:)
+      self.times  = times
+      self.axiom  = axiom
+      self.rules  = rules
+      self.invert = invert
     end
 
     def call
       production = production_for(times, axiom, rules)
       path       = traverse production
       path       = normalize path
-      maze       = maze_for path
+      maze       = maze_for path, invert: invert
       maze       = add_start_and_finish maze
       maze
     end
@@ -83,7 +86,15 @@ class Maze
       path.map { |x, y| [x+xdelta, y+ydelta] }
     end
 
-    def maze_for(path)
+    def maze_for(path, invert:)
+      if invert
+        inverted_generate path
+      else
+        normal_generate path
+      end
+    end
+
+    def inverted_generate(path)
       walls = Set.new path.map { |x, y| [x+2, y+2] }
       xmax, ymax = walls.to_a.transpose.map(&:max)
       maze = Maze.new width: xmax+3, height: ymax+3
@@ -93,6 +104,13 @@ class Maze
           maze.set :path, cell unless walls.include? cell
         end
       end
+      maze
+    end
+
+    def normal_generate(path)
+      xmax, ymax = path.transpose.map(&:max)
+      maze = Maze.new width: xmax+3, height: ymax+3
+      path.each { |(x, y)| maze.set(:path, [x+1, y+1]) }
       maze
     end
 
