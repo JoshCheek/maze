@@ -42,6 +42,10 @@ random_seed = ($s || Random::DEFAULT.seed).to_i
 
 # =====  Load the lib =====
 $LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
+require 'maze/generate'
+require 'maze/generate_lsystem'
+require 'maze/breadth_first_search'
+require 'maze/best_first_search'
 
 # =====  Record randomness  =====
 Random.srand random_seed
@@ -64,8 +68,6 @@ display.clear
 
 display.without_cursor do
   # =====  Generate the maze  =====
-  require 'maze/generate'
-  require 'maze/generate_lsystem'
 
   $g ||= generators.sample
   if $g == 'recursive'
@@ -97,7 +99,6 @@ display.without_cursor do
   end
 
   # =====  Breadth First Search  =====
-  require 'maze/breadth_first_search'
   Maze::BreadthFirstSearch.call maze:           maze,
                                 start:          maze.start,
                                 finish:         maze.finish,
@@ -128,4 +129,19 @@ display.without_cursor do
                  red:     dfs.finish
     sleep 0.001
   end
+
+  puts display.colour("Press any key!", :red)
+  $stdin.raw &:getc
+  display.clear
+
+  # =====  Best First Search  =====
+  dfs = Maze::BestFirstSearch.call maze: maze, start: maze.start, finish: maze.finish, on_search: lambda { |current, bfs|
+    display.call maze:    maze,
+                 heading: {text: 'Best First Search: Searching', colour: :blue},
+                 green:   current,
+                 magenta: [maze.start, maze.finish],
+                 orange:  bfs.explored,
+                 red:     bfs.finish
+    sleep 0.001
+  }
 end

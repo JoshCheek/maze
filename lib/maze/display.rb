@@ -92,11 +92,11 @@ class Maze
     private
 
     def puts(strings)
-      enabled? && stream.puts(*strings)
+      enabled? && stream.puts(Array(strings).join.gsub(/\n/, "\r\n"))
     end
 
     def print(*strings)
-      enabled? && stream.print(*strings)
+      enabled? && stream.print(Array(strings).join.gsub(/\n/, "\r\n"))
     end
 
     def text_for(cell)
